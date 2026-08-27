@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 2: Practical Python — Learn Python in 5 Days</title>
+  <style>
+    :root {
+      --bg-primary: #111215;
+      --bg-card: #181a1f;
+      --bg-card-alt: #1f2229;
+      --bg-code: #0b0c0e;
+      --border-color: #2e323b;
+      --border-subtle: #232730;
+      --text-primary: #ffffff;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent-yellow: #ffe600;
+      --accent-yellow-dim: rgba(255, 230, 0, 0.12);
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-rose: #fb7185;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Fira Code", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #08090a;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Presentation Container (Fixed 16:9 Aspect Ratio) */
+    #deck-container {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      background: var(--bg-primary);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Progress Bar */
+    #progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent-yellow);
+      width: 0%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    /* Slide Deck Wrapper */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 44px 54px 40px 54px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      margin-bottom: 18px;
+    }
+
+    .slide-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-yellow);
+      margin-bottom: 5px;
+    }
+
+    .slide-eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-yellow);
+      border-radius: 2px;
+    }
+
+    .slide-title {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+    }
+
+    .slide-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    /* Main Content Body */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    /* Grid Layout Helpers */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-1-2 {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-2-1 {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.highlight {
+      border-color: rgba(255, 230, 0, 0.4);
+      background: linear-gradient(180deg, rgba(255, 230, 0, 0.03) 0%, var(--bg-card) 100%);
+    }
+
+    .card-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent-yellow);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--bg-card-alt);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: var(--font-mono);
+    }
+
+    .code-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 11px 13px;
+      font-size: 11.5px;
+      line-height: 1.48;
+      color: #e5e7eb;
+      overflow-x: auto;
+      margin-bottom: 8px;
+      flex: 1;
+    }
+
+    .code-box:last-child {
+      margin-bottom: 0;
+    }
+
+    .code-box code {
+      font-size: 11.5px;
+      white-space: pre;
+    }
+
+    /* Syntax Highlighting */
+    .kw { color: #facc15; font-weight: 600; } /* keywords */
+    .fn { color: #60a5fa; font-weight: 600; } /* functions */
+    .str { color: #86efac; } /* strings */
+    .num { color: #f472b6; } /* numbers */
+    .type { color: #c084fc; } /* types */
+    .cm { color: #6b7280; font-style: italic; } /* comments */
+    .op { color: #94a3b8; } /* operators */
+    .var { color: #e2e8f0; }
+    .dec { color: #fb923c; font-weight: 600; } /* decorators */
+
+    /* Comparison Table / Box */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .compare-col {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 9px 11px;
+    }
+
+    .compare-col.js {
+      border-top: 2px solid #eab308;
+    }
+
+    .compare-col.py {
+      border-top: 2px solid var(--accent-cyan);
+    }
+
+    .compare-head {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Lists and Callouts */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .feature-list li {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.38;
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .feature-list li::before {
+      content: "•";
+      color: var(--accent-yellow);
+      font-size: 15px;
+      position: absolute;
+      left: 3px;
+      top: -2px;
+    }
+
+    .callout {
+      background: var(--accent-yellow-dim);
+      border-left: 3px solid var(--accent-yellow);
+      padding: 7px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      margin-top: auto;
+    }
+
+    .callout strong {
+      color: var(--accent-yellow);
+    }
+
+    .callout-alert {
+      background: rgba(251, 113, 133, 0.1);
+      border-left: 3px solid var(--accent-rose);
+      padding: 7px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: #fecdd3;
+      margin-top: auto;
+    }
+
+    .callout-alert strong {
+      color: var(--accent-rose);
+    }
+
+    /* Slide Footer (Mandatory on every slide) */
+    .slide-footer {
+      height: 30px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .footer-left {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-item strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .footer-right {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-yellow);
+    }
+
+    /* Navigation Controls */
+    #nav-controls {
+      position: fixed;
+      bottom: 16px;
+      right: 24px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      background: rgba(17, 18, 21, 0.85);
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-btn {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
+    /* Title Slide Specific Styles */
+    .title-slide {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      padding-left: 20px;
+    }
+
+    .title-badge {
+      display: inline-block;
+      background: var(--accent-yellow);
+      color: #000000;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    .main-title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .main-title span {
+      color: var(--accent-yellow);
+    }
+
+    .main-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 840px;
+      line-height: 1.5;
+      margin-bottom: 34px;
+    }
+
+    .title-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 860px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 22px;
+    }
+
+    .meta-box h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .meta-box p {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="deck-container">
+    <div id="progress-bar"></div>
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide active" data-slide="1">
+      <div class="title-slide">
+        <div class="title-badge">Learn Python in 5 Days • Day 2 of 5</div>
+        <h1 class="main-title">Practical Python &amp; <span>Modular Architecture</span></h1>
+        <p class="main-subtitle">
+          Transitioning from isolated scripts to maintainable application code.
+          Mastering modules, dataclasses, robust filesystem I/O, error hierarchies, and Pythonic decorators.
+        </p>
+
+        <div class="title-meta-grid">
+          <div class="meta-box">
+            <h4>Format</h4>
+            <p>60 Min • Cheatsheet &amp; Notebook</p>
+          </div>
+          <div class="meta-box">
+            <h4>Target Outcome</h4>
+            <p>Build Structured Python Apps</p>
+          </div>
+          <div class="meta-box">
+            <h4>Key Paradigms</h4>
+            <p>Dataclasses • pathlib • Context Managers</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">01 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Transition to Application Engineering -->
+    <div class="slide" data-slide="2">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Mental Model Shift</div>
+        <h2 class="slide-title">Python becomes powerful when scripts evolve into modular systems</h2>
+        <p class="slide-subtitle">How structured modules, typed models, and clean boundaries replace ad-hoc scripts</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">1. Organization <span class="tag">Modules</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Splitting responsibilities across distinct files and standard libraries.</p>
+            <div style="background:var(--bg-code); padding:8px 10px; border-radius:6px; font-family:var(--font-mono); font-size:11px; margin-bottom:8px; line-height:1.4;">
+              app/<br>
+              ├── models.py<br>
+              ├── services.py<br>
+              └── main.py
+            </div>
+            <div class="callout">
+              <strong>JS Equivalent:</strong> ES Modules (<code>import / export</code>) vs Python's clean namespace imports.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">2. Data Modeling <span class="tag">Dataclasses</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li>Moving away from raw, untyped dictionaries.</li>
+              <li>Defining structured domain models using <code>@dataclass</code>.</li>
+              <li>Automatic <code>__init__</code>, equality checks, and field type hinting.</li>
+            </ul>
+            <div class="callout">
+              <strong>TS Equivalent:</strong> Like TypeScript interfaces, but enforced at instantiation time!
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3. Reliability <span class="tag">I/O &amp; Errors</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>`pathlib`</strong> for bulletproof cross-platform file manipulation.</li>
+              <li><strong>`with` statement</strong> for automatic resource cleanup (no leaked file descriptors).</li>
+              <li><strong>Custom Exceptions</strong> to signal exact domain failure conditions.</li>
+            </ul>
+            <div class="callout">
+              <strong>Principle:</strong> Deterministic resource management and explicit error domains.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">02 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Modules & Imports Cheatsheet -->
+    <div class="slide" data-slide="3">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Modules &amp; Imports</div>
+        <h2 class="slide-title">Modules turn standalone scripts into reusable architectural packages</h2>
+        <p class="slide-subtitle">Importing standard libraries, local project files, and handling Python module paths</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Import Syntax &amp; Common Patterns <span class="tag">Syntax</span></div>
+            <pre class="code-box"><code><span class="cm"># 1. Standard Library imports</span>
+<span class="kw">import</span> json
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+
+<span class="cm"># 2. Local module imports</span>
+<span class="kw">from</span> app.models <span class="kw">import</span> Task
+<span class="kw">from</span> app.services <span class="kw">import</span> TaskService
+
+<span class="cm"># 3. Aliasing imports</span>
+<span class="kw">import</span> statistics <span class="kw">as</span> stats
+
+<span class="cm"># 4. Standard module entrypoint safeguard</span>
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="cm"># Only runs if executed directly via `python main.py`</span>
+    <span class="fn">main</span>()</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">JS/TS Comparison &amp; Namespace Rules <span class="tag">Namespace</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>No <code>export</code> keyword:</strong> Every top-level function, class, and variable in a Python file is automatically exportable.</li>
+              <li><strong>Wildcard Gotcha:</strong> Never use <code>from module import *</code> (pollutes local namespace and causes naming collisions).</li>
+              <li><strong><code>__init__.py</code>:</strong> Marks a directory as an importable Python package.</li>
+            </ul>
+            <div class="compare-grid">
+              <div class="compare-col js">
+                <div class="compare-head">JS / TS (ESM)</div>
+                <code style="font-size:11px;">import { Task } from "./models.js";<br>import * as fs from "fs";<br>export const x = 10;</code>
+              </div>
+              <div class="compare-col py">
+                <div class="compare-head">Python 3.12</div>
+                <code style="font-size:11px;">from app.models import Task<br>import pathlib<br>x = 10  # auto-exported</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">03 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Classes & Objects Basics -->
+    <div class="slide" data-slide="4">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • OOP Fundamentals</div>
+        <h2 class="slide-title">Python classes use explicit <code>self</code> to reference the instance</h2>
+        <p class="slide-subtitle">Constructors (<code>__init__</code>), instance methods, and how <code>self</code> differs from JavaScript's dynamic <code>this</code></p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Class Definition &amp; Methods <span class="tag">Syntax</span></div>
+            <pre class="code-box"><code><span class="kw">class</span> <span class="type">TaskManager</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, project_name: <span class="type">str</span>):
+        <span class="cm"># Instance attribute (attached to specific instance)</span>
+        <span class="var">self</span>.project_name = project_name
+        <span class="var">self</span>.tasks = []
+
+    <span class="kw">def</span> <span class="fn">add_task</span>(<span class="var">self</span>, task_title: <span class="type">str</span>) -&gt; <span class="type">None</span>:
+        <span class="var">self</span>.tasks.append(task_title)
+
+    <span class="kw">def</span> <span class="fn">count</span>(<span class="var">self</span>) -&gt; <span class="type">int</span>:
+        <span class="kw">return</span> <span class="fn">len</span>(<span class="var">self</span>.tasks)
+
+<span class="cm"># Instantiation (no 'new' keyword!)</span>
+manager = <span class="type">TaskManager</span>(<span class="str">"Platform V2"</span>)
+manager.<span class="fn">add_task</span>(<span class="str">"Implement Auth"</span>)
+<span class="fn">print</span>(manager.<span class="fn">count</span>())  <span class="cm"># -> 1</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">The <code>self</code> vs <code>this</code> Mental Model <span class="tag">Key Takeaways</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Explicit <code>self</code>:</strong> In Python, <code>self</code> must be the first parameter of every instance method definition, but it is passed automatically when calling <code>obj.method()</code>.</li>
+              <li><strong>No <code>this</code> binding issues:</strong> Unlike JS where <code>this</code> can lose context when passed as a callback, Python method references retain their bound instance!</li>
+              <li><strong>No <code>new</code> keyword:</strong> Call the class directly as a function (e.g. <code>TaskManager(...)</code>).</li>
+            </ul>
+            <div class="callout">
+              <strong>JS Translation:</strong> <code>def __init__(self, x):</code> is Python's constructor: <code>constructor(x) { this.x = x; }</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">04 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Dataclasses Cheatsheet -->
+    <div class="slide" data-slide="5">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Dataclasses</div>
+        <h2 class="slide-title">Dataclasses eliminate OOP boilerplate and provide structured domain models</h2>
+        <p class="slide-subtitle">Using <code>@dataclass</code> to automatically generate constructors, string representations, and value comparisons</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Clean Model Definition with <code>@dataclass</code> <span class="tag">Boilerplate-Free</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="dec">@dataclass</span>
+<span class="kw">class</span> <span class="type">Task</span>:
+    id: <span class="type">int</span>
+    title: <span class="type">str</span>
+    completed: <span class="type">bool</span> = <span class="kw">False</span>
+    priority: <span class="type">str</span> = <span class="str">"Normal"</span>
+    tags: <span class="type">list</span>[<span class="type">str</span>] = field(default_factory=list)
+
+<span class="cm"># Automatic constructor, __repr__, and __eq__</span>
+t1 = <span class="type">Task</span>(id=<span class="num">1</span>, title=<span class="str">"Write docs"</span>, priority=<span class="str">"High"</span>)
+t2 = <span class="type">Task</span>(id=<span class="num">1</span>, title=<span class="str">"Write docs"</span>, priority=<span class="str">"High"</span>)
+
+<span class="fn">print</span>(t1)       <span class="cm"># -> Task(id=1, title='Write docs', ...)</span>
+<span class="fn">print</span>(t1 == t2) <span class="cm"># -> True (Compares values, not memory pointers!)</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Why Dataclasses are Superior to Plain Classes <span class="tag">Benefits</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Zero Boilerplate:</strong> No need to manually write repetitive <code>def __init__(self, a, b, c): self.a = a...</code>.</li>
+              <li><strong>Meaningful String Print:</strong> <code>print(task)</code> displays formatted property values instead of obscure memory addresses like <code>&lt;Task object at 0x102...&gt;</code>.</li>
+              <li><strong>Safe Mutable Defaults:</strong> Use <code>field(default_factory=list)</code> to ensure every instance receives a unique list.</li>
+            </ul>
+            <div class="callout">
+              <strong>FastAPI Bridge:</strong> In Day 4, Pydantic's <code>BaseModel</code> expands on this exact syntax to add automatic API request validation!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">05 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Modern Filesystem with pathlib -->
+    <div class="slide" data-slide="6">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • File Operations</div>
+        <h2 class="slide-title"><code>pathlib.Path</code> provides intuitive, cross-platform filesystem manipulation</h2>
+        <p class="slide-subtitle">Replacing legacy string concatenation with the modern slash operator <code>/</code> and path inspection methods</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The <code>pathlib.Path</code> API <span class="tag">Modern I/O</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="cm"># Resolving the directory of the current script</span>
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / <span class="str">"data"</span>             <span class="cm"># Uses / for cross-platform joining</span>
+DATA_FILE = DATA_DIR / <span class="str">"tasks.json"</span>
+
+<span class="cm"># Safe directory creation (mkdir -p equivalent)</span>
+DATA_DIR.mkdir(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+
+<span class="cm"># Path properties</span>
+<span class="fn">print</span>(DATA_FILE.name)       <span class="cm"># -> "tasks.json"</span>
+<span class="fn">print</span>(DATA_FILE.suffix)     <span class="cm"># -> ".json"</span>
+<span class="fn">print</span>(DATA_FILE.exists())   <span class="cm"># -> True / False</span>
+
+<span class="cm"># Direct text read/write shortcuts for small files</span>
+DATA_FILE.write_text(<span class="str">'{"status": "ok"}'</span>, encoding=<span class="str">"utf-8"</span>)
+content = DATA_FILE.read_text(encoding=<span class="str">"utf-8"</span>)</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Node.js `path` vs Python `pathlib` <span class="tag">Comparison</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>The Slash Operator:</strong> <code>DATA_DIR / "file.txt"</code> works seamlessly on Windows (<code>\</code>), macOS, and Linux (<code>/</code>).</li>
+              <li><strong>Always anchor to <code>__file__</code>:</strong> Relative paths like <code>open("data.json")</code> depend on where you ran the terminal from! Always use <code>Path(__file__).parent</code>.</li>
+            </ul>
+            <div class="compare-grid">
+              <div class="compare-col js">
+                <div class="compare-head">Node.js path / fs</div>
+                <code style="font-size:11px;">path.join(__dirname, "data");<br>fs.existsSync(p);<br>fs.mkdirSync(p, {recursive:true});</code>
+              </div>
+              <div class="compare-col py">
+                <div class="compare-head">Python pathlib</div>
+                <code style="font-size:11px;">Path(__file__).parent / "data"<br>p.exists()<br>p.mkdir(parents=True, exist_ok=True)</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">06 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Context Managers & the with Statement -->
+    <div class="slide" data-slide="7">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Resource Management</div>
+        <h2 class="slide-title">The <code>with</code> statement guarantees resource cleanup and prevents leaks</h2>
+        <p class="slide-subtitle">Deterministic file descriptor and connection closing even if unexpected exceptions occur</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Context Managers with <code>open(...)</code> <span class="tag">Pattern</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+log_path = Path(__file__).parent / <span class="str">"app.log"</span>
+
+<span class="cm"># 1. Writing to a file cleanly (mode="w" or mode="a" for append)</span>
+<span class="kw">with</span> <span class="fn">open</span>(log_path, mode=<span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> file:
+    file.write(<span class="str">"2026-08-27: User authenticated successfully\n"</span>)
+<span class="cm"># File is GUARANTEED closed here!</span>
+
+<span class="cm"># 2. Reading line-by-line efficiently</span>
+<span class="kw">with</span> <span class="fn">open</span>(log_path, mode=<span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> file:
+    <span class="kw">for</span> line <span class="kw">in</span> file:
+        <span class="fn">print</span>(<span class="str">f"Log: <span class="op">{</span>line.strip()<span class="op">}</span>"</span>)</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Why Never Use Manual <code>file.close()</code> <span class="tag">RAII Safety</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Exception Safety:</strong> If an unhandled exception occurs inside a <code>with</code> block, Python's runtime guarantees the file handle is closed immediately before propagating the error.</li>
+              <li><strong>Encapsulation:</strong> Eliminates boilerplate <code>try ... finally { file.close() }</code> blocks.</li>
+              <li><strong>Universal Concept:</strong> Used across Python for database connections, locks, thread pools, and network sessions.</li>
+            </ul>
+            <div class="callout-alert">
+              <strong>Rule of Thumb:</strong> If an object manages an external I/O resource, always consume it within a <code>with</code> block.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">07 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: JSON Serialization Cheatsheet -->
+    <div class="slide" data-slide="8">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • JSON &amp; Persistence</div>
+        <h2 class="slide-title">Python's <code>json</code> module provides intuitive serialization and deserialization</h2>
+        <p class="slide-subtitle">Distinguishing between in-memory string conversion (<code>dumps/loads</code>) and direct file I/O (<code>dump/load</code>)</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The Four Core JSON Functions <span class="tag">API</span></div>
+            <pre class="code-box"><code><span class="kw">import</span> json
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+data = [{<span class="str">"id"</span>: <span class="num">1</span>, <span class="str">"title"</span>: <span class="str">"Review PR"</span>, <span class="str">"done"</span>: <span class="kw">False</span>}]
+target_file = Path(__file__).parent / <span class="str">"tasks.json"</span>
+
+<span class="cm"># 1. Direct File Save: json.dump (writes to file object)</span>
+<span class="kw">with</span> <span class="fn">open</span>(target_file, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    json.<span class="fn">dump</span>(data, f, indent=<span class="num">2</span>)
+
+<span class="cm"># 2. Direct File Read: json.load (reads from file object)</span>
+<span class="kw">with</span> <span class="fn">open</span>(target_file, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    loaded_data = json.<span class="fn">load</span>(f)
+
+<span class="cm"># 3. String Conversion: json.dumps / json.loads (In-memory)</span>
+json_str = json.<span class="fn">dumps</span>(data)              <span class="cm"># JS: JSON.stringify(data)</span>
+parsed_dict = json.<span class="fn">loads</span>(json_str)        <span class="cm"># JS: JSON.parse(json_str)</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Memory Aid: The "s" Rule &amp; JS Comparison <span class="tag">Mnemonic</span></div>
+            <div style="background:var(--bg-code); padding:9px 12px; border-radius:6px; margin-bottom:10px; font-size:11.5px;">
+              <strong style="color:var(--accent-yellow);">Memory Aid:</strong><br>
+              • <code>json.loads()</code> / <code>dumps()</code> with an <strong>s</strong> operates on <strong>S</strong>trings.<br>
+              • <code>json.load()</code> / <code>dump()</code> without an <strong>s</strong> operates on <strong>F</strong>iles.
+            </div>
+            <div class="compare-grid">
+              <div class="compare-col js">
+                <div class="compare-head">JavaScript</div>
+                <code style="font-size:11px;">JSON.stringify(obj, null, 2);<br>JSON.parse(str);</code>
+              </div>
+              <div class="compare-col py">
+                <div class="compare-head">Python</div>
+                <code style="font-size:11px;">json.dumps(obj, indent=2)<br>json.loads(str)</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">08 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Exception Handling Cheatsheet -->
+    <div class="slide" data-slide="9">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Exceptions</div>
+        <h2 class="slide-title">Python exception handling uses <code>try / except / else / finally</code> blocks</h2>
+        <p class="slide-subtitle">Structured, granular error interception with explicit exception classes and cleanup logic</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Structured Exception Syntax <span class="tag">Control Flow</span></div>
+            <pre class="code-box"><code><span class="kw">def</span> <span class="fn">read_config</span>(file_path: <span class="type">str</span>) -&gt; <span class="type">dict</span>:
+    <span class="kw">try</span>:
+        <span class="kw">with</span> <span class="fn">open</span>(file_path, <span class="str">"r"</span>) <span class="kw">as</span> f:
+            <span class="kw">return</span> json.<span class="fn">load</span>(f)
+    <span class="kw">except</span> <span class="type">FileNotFoundError</span>:
+        <span class="fn">print</span>(<span class="str">f"Config file not found at <span class="op">{</span>file_path<span class="op">}</span>, using defaults"</span>)
+        <span class="kw">return</span> {<span class="str">"theme"</span>: <span class="str">"dark"</span>, <span class="str">"retries"</span>: <span class="num">3</span>}
+    <span class="kw">except</span> json.<span class="type">JSONDecodeError</span> <span class="kw">as</span> err:
+        <span class="fn">print</span>(<span class="str">f"Malformed JSON on line <span class="op">{</span>err.lineno<span class="op">}</span>: <span class="op">{</span>err.msg<span class="op">}</span>"</span>)
+        <span class="kw">raise</span> <span class="type">ValueError</span>(<span class="str">"Invalid configuration format"</span>) <span class="kw">from</span> err
+    <span class="kw">finally</span>:
+        <span class="fn">print</span>(<span class="str">"Config load attempt completed"</span>)</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Common Built-In Exception Types <span class="tag">Reference</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><code>ValueError</code>: Right type, but inappropriate value (e.g. <code>int("abc")</code>).</li>
+              <li><code>KeyError</code>: Accessing a dictionary key that does not exist.</li>
+              <li><code>TypeError</code>: Operation on an incompatible type (e.g. <code>len(42)</code>).</li>
+              <li><code>FileNotFoundError</code>: Missing file during filesystem operations.</li>
+              <li><code>IndexError</code>: Sequence subscript out of range.</li>
+            </ul>
+            <div class="callout">
+              <strong>JS Comparison:</strong> <code>raise ValueError("...")</code> corresponds directly to JavaScript's <code>throw new Error("...")</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">09 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Custom Domain Exceptions -->
+    <div class="slide" data-slide="10">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Custom Exceptions</div>
+        <h2 class="slide-title">Custom exceptions create clean, expressive application error domains</h2>
+        <p class="slide-subtitle">Inheriting from <code>Exception</code> to distinguish business rule violations from system crashes</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Defining &amp; Raising Domain Exceptions <span class="tag">Pattern</span></div>
+            <pre class="code-box"><code><span class="cm"># 1. Base application exception</span>
+<span class="kw">class</span> <span class="type">AppError</span>(<span class="type">Exception</span>):
+    <span class="str">"""Base exception for all application errors."""</span>
+    <span class="kw">pass</span>
+
+<span class="cm"># 2. Specific domain errors</span>
+<span class="kw">class</span> <span class="type">TaskNotFoundError</span>(<span class="type">AppError</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, task_id: <span class="type">int</span>):
+        <span class="var">self</span>.task_id = task_id
+        <span class="fn">super</span>().<span class="fn">__init__</span>(<span class="str">f"Task with ID <span class="op">{</span>task_id<span class="op">}</span> was not found."</span>)
+
+<span class="kw">class</span> <span class="type">DuplicateTaskError</span>(<span class="type">AppError</span>):
+    <span class="kw">pass</span>
+
+<span class="cm"># Raising domain exception</span>
+<span class="kw">def</span> <span class="fn">find_task</span>(task_id: <span class="type">int</span>, tasks: <span class="type">list</span>):
+    <span class="kw">for</span> t <span class="kw">in</span> tasks:
+        <span class="kw">if</span> t.id == task_id:
+            <span class="kw">return</span> t
+    <span class="kw">raise</span> <span class="type">TaskNotFoundError</span>(task_id)</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Interception at the Service / API Boundary <span class="tag">Handling</span></div>
+            <pre class="code-box"><code><span class="kw">try</span>:
+    task = <span class="fn">find_task</span>(<span class="num">999</span>, active_tasks)
+<span class="kw">except</span> <span class="type">TaskNotFoundError</span> <span class="kw">as</span> err:
+    <span class="cm"># Clean boundary translation to HTTP 404 in FastAPI</span>
+    <span class="fn">print</span>(<span class="str">f"Handled error: <span class="op">{</span>err<span class="op">}</span> (ID: <span class="op">{</span>err.task_id<span class="op">}</span>)"</span>)</code></pre>
+            <ul class="feature-list" style="margin-top:6px;">
+              <li><strong>Self-Documenting Code:</strong> Calling code immediately knows which failure states to handle.</li>
+              <li><strong>Payload Attached:</strong> Store metadata directly on the error instance (e.g. <code>err.task_id</code>).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">10 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Advanced Arguments (*args, **kwargs) -->
+    <div class="slide" data-slide="11">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Arguments</div>
+        <h2 class="slide-title"><code>*args</code> and <code>**kwargs</code> provide flexible parameter forwarding and unpacking</h2>
+        <p class="slide-subtitle">Capturing arbitrary positional arguments as a tuple and keyword arguments as a dictionary</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Capturing Variadic Arguments <span class="tag">Syntax</span></div>
+            <pre class="code-box"><code><span class="kw">def</span> <span class="fn">log_event</span>(event_name: <span class="type">str</span>, *args, **kwargs):
+    <span class="fn">print</span>(<span class="str">f"Event: <span class="op">{</span>event_name<span class="op">}</span>"</span>)
+    <span class="fn">print</span>(<span class="str">f"Positional args (tuple): <span class="op">{</span>args<span class="op">}</span>"</span>)
+    <span class="fn">print</span>(<span class="str">f"Keyword args (dict): <span class="op">{</span>kwargs<span class="op">}</span>"</span>)
+
+<span class="fn">log_event</span>(
+    <span class="str">"USER_SIGNUP"</span>,
+    <span class="str">"audit"</span>, <span class="str">"v2"</span>,                <span class="cm"># Packed into *args</span>
+    user_id=<span class="num">101</span>, ip=<span class="str">"127.0.0.1"</span>    <span class="cm"># Packed into **kwargs</span>
+)
+<span class="cm"># args   -> ('audit', 'v2')</span>
+<span class="cm"># kwargs -> {'user_id': 101, 'ip': '127.0.0.1'}</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Unpacking at Call Sites &amp; JS Comparison <span class="tag">Spread</span></div>
+            <pre class="code-box"><code><span class="kw">def</span> <span class="fn">configure_server</span>(host: <span class="type">str</span>, port: <span class="type">int</span>, timeout: <span class="type">int</span>):
+    <span class="fn">print</span>(<span class="str">f"Connecting to <span class="op">{</span>host<span class="op">}</span>:<span class="op">{</span>port<span class="op">}</span> (timeout: <span class="op">{</span>timeout<span class="op">}</span>s)"</span>)
+
+opts = {<span class="str">"host"</span>: <span class="str">"127.0.0.1"</span>, <span class="str">"port"</span>: <span class="num">8000</span>, <span class="str">"timeout"</span>: <span class="num">30</span>}
+
+<span class="cm"># Unpack dictionary keys as keyword arguments</span>
+<span class="fn">configure_server</span>(**opts)</code></pre>
+            <div class="compare-grid">
+              <div class="compare-col js">
+                <div class="compare-head">JS Rest / Spread</div>
+                <code style="font-size:11px;">function f(...args) {}<br>f(...arr);<br>const obj = {...a, ...b};</code>
+              </div>
+              <div class="compare-col py">
+                <div class="compare-head">Python * and **</div>
+                <code style="font-size:11px;">def f(*args, **kwargs):<br>f(*arr, **dict_args)<br>combined = {**a, **b}</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">11 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Decorators Conceptual Mechanics -->
+    <div class="slide" data-slide="12">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Decorators</div>
+        <h2 class="slide-title">Decorators are higher-order functions that wrap and augment behavior</h2>
+        <p class="slide-subtitle">Understanding the syntax sugar <code>@decorator</code> as <code>func = decorator(func)</code></p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">How Decorators Work Internally <span class="tag">Higher-Order</span></div>
+            <pre class="code-box"><code><span class="kw">import</span> functools
+<span class="kw">import</span> time
+
+<span class="kw">def</span> <span class="fn">timer</span>(func):
+    <span class="dec">@functools.wraps</span>(func)  <span class="cm"># Preserves original func name & docstring</span>
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+        start = time.perf_counter()
+        result = <span class="fn">func</span>(*args, **kwargs)
+        elapsed = time.perf_counter() - start
+        <span class="fn">print</span>(<span class="str">f"[PERF] <span class="op">{</span>func.__name__<span class="op">}</span> executed in <span class="op">{</span>elapsed*1000:.2f<span class="op">}</span>ms"</span>)
+        <span class="kw">return</span> result
+    <span class="kw">return</span> wrapper</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Applying Decorators with <code>@</code> <span class="tag">Usage</span></div>
+            <pre class="code-box"><code><span class="dec">@timer</span>
+<span class="kw">def</span> <span class="fn">process_records</span>(count: <span class="type">int</span>):
+    time.sleep(<span class="num">0.05</span>)  <span class="cm"># Simulate I/O or work</span>
+    <span class="kw">return</span> <span class="str">f"Processed <span class="op">{</span>count<span class="op">}</span> records"</span>
+
+<span class="cm"># Calling the decorated function normally</span>
+msg = <span class="fn">process_records</span>(<span class="num">500</span>)
+<span class="cm"># Prints: [PERF] process_records executed in 50.12ms</span></code></pre>
+            <div class="callout">
+              <strong>JS Comparison:</strong> Similar to Higher-Order Components (HOCs) in React or Express middleware wrappers: <code>const withTimer = fn => (...args) => ...</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">12 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Practical Decorator Use Cases -->
+    <div class="slide" data-slide="13">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Practical Patterns • Decorators</div>
+        <h2 class="slide-title">Decorators power logging, caching, authentication, and routing</h2>
+        <p class="slide-subtitle">Recognizing the decorator patterns you will use in FastAPI, testing, and service layers</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">1. Standard Library <span class="tag">Built-ins</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+
+<span class="dec">@lru_cache</span>(maxsize=<span class="num">128</span>)
+<span class="kw">def</span> <span class="fn">expensive_calc</span>(n: <span class="type">int</span>):
+    <span class="cm"># Automatically memoizes results!</span>
+    <span class="kw">return</span> n ** <span class="num">3</span></code></pre>
+            <div class="callout">
+              <strong>Memoization:</strong> Built-in LRU cache with zero boilerplate.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">2. Model Modeling <span class="tag">@dataclass</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+<span class="dec">@dataclass</span>
+<span class="kw">class</span> <span class="type">User</span>:
+    id: <span class="type">int</span>
+    username: <span class="type">str</span></code></pre>
+            <div class="callout">
+              <strong>Class Decorator:</strong> Transforms classes by auto-generating dunder methods.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3. FastAPI Routes <span class="tag">Preview</span></div>
+            <pre class="code-box"><code><span class="cm"># Coming in Day 4:</span>
+<span class="dec">@app.get</span>(<span class="str">"/tasks"</span>)
+<span class="kw">def</span> <span class="fn">list_tasks</span>():
+    <span class="kw">return</span> task_service.<span class="fn">all</span>()</code></pre>
+            <div class="callout">
+              <strong>Route Registration:</strong> Registers URL paths directly with the API router.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">13 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: Class Attribute Trap -->
+    <div class="slide" data-slide="14">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Critical Gotchas • Classes</div>
+        <h2 class="slide-title">The mutable class attribute trap: shared state across instances</h2>
+        <p class="slide-subtitle">Distinguishing between class-level variables (shared) and instance-level attributes (isolated)</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">The Trap: Class-Level Mutable List <span class="tag">Dangerous Bug</span></div>
+            <pre class="code-box"><code><span class="kw">class</span> <span class="type">BuggyUser</span>:
+    <span class="cm"># Class attribute (shared by ALL instances!)</span>
+    roles = []
+
+u1 = <span class="type">BuggyUser</span>()
+u2 = <span class="type">BuggyUser</span>()
+
+u1.roles.append(<span class="str">"admin"</span>)
+
+<span class="cm"># BUG: u2 has "admin" too!</span>
+<span class="fn">print</span>(u2.roles)  <span class="cm"># -> ['admin']</span></code></pre>
+            <div class="callout-alert">
+              <strong>Cause:</strong> Attributes defined directly under <code>class</code> belong to the class object, not individual instances!
+            </div>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">The Fix: Initialize in `__init__` or `@dataclass` <span class="tag">Clean Fix</span></div>
+            <pre class="code-box"><code><span class="kw">class</span> <span class="type">SafeUser</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>):
+        <span class="cm"># Instance attribute (unique per instance)</span>
+        <span class="var">self</span>.roles = []
+
+u1 = <span class="type">SafeUser</span>()
+u2 = <span class="type">SafeUser</span>()
+
+u1.roles.append(<span class="str">"admin"</span>)
+<span class="fn">print</span>(u2.roles)  <span class="cm"># -> [] (Completely isolated!)</span></code></pre>
+            <div class="callout">
+              <strong>Dataclass Pattern:</strong> In dataclasses, use <code>roles: list[str] = field(default_factory=list)</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">14 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: Working Directory & Path Trap -->
+    <div class="slide" data-slide="15">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Critical Gotchas • File Paths</div>
+        <h2 class="slide-title">Relative file paths break when scripts are executed from different directories</h2>
+        <p class="slide-subtitle">Why <code>open("data.json")</code> fails in production and how <code>Path(__file__).parent</code> solves it</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">The Fragile Relative Path Trap <span class="tag">Runtime Error</span></div>
+            <pre class="code-box"><code><span class="cm"># In app/services.py:</span>
+<span class="kw">def</span> <span class="fn">load_data</span>():
+    <span class="cm"># Fragile: Looks in current working directory (CWD)!</span>
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data/tasks.json"</span>) <span class="kw">as</span> f:
+        <span class="kw">return</span> json.<span class="fn">load</span>(f)
+
+<span class="cm"># If run from workspace root: works!</span>
+<span class="cm"># If run from inside app/ or via cron/test: FileNotFoundError!</span></code></pre>
+            <div class="callout-alert">
+              <strong>Root Cause:</strong> Relative string paths resolve against <code>os.getcwd()</code>, NOT the file location!
+            </div>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">The Robust Pattern: Anchor with `__file__` <span class="tag">Production Standard</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="cm"># Always anchor relative to the current script file</span>
+BASE_DIR = Path(__file__).resolve().parent
+DATA_PATH = BASE_DIR / <span class="str">"data"</span> / <span class="str">"tasks.json"</span>
+
+<span class="kw">def</span> <span class="fn">load_data_safe</span>():
+    <span class="kw">with</span> <span class="fn">open</span>(DATA_PATH, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+        <span class="kw">return</span> json.<span class="fn">load</span>(f)</code></pre>
+            <div class="callout">
+              <strong>Rule:</strong> Always anchor paths relative to <code>Path(__file__).parent</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">15 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 16: Broad Exception Trap -->
+    <div class="slide" data-slide="16">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Critical Gotchas • Error Handling</div>
+        <h2 class="slide-title">Broad <code>except Exception:</code> swallows critical syntax and system errors</h2>
+        <p class="slide-subtitle">Catch specific exceptions to prevent masking syntax typos, missing imports, and interrupts</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">Anti-Pattern: Catching Everything Blindly <span class="tag">Dangerous</span></div>
+            <pre class="code-box"><code><span class="kw">try</span>:
+    user_record = fetch_user_data(user_id)
+<span class="kw">except</span> <span class="type">Exception</span>:
+    <span class="cm"># SWALLOWS: NameError, TypeError, KeyboardInterrupt!</span>
+    <span class="fn">print</span>(<span class="str">"Something failed"</span>)
+    <span class="kw">return</span> <span class="kw">None</span></code></pre>
+            <ul class="feature-list" style="margin-top:6px;">
+              <li>If you have a typo (e.g. <code>fetch_usr_data</code>), it silently fails instead of showing a helpful traceback!</li>
+            </ul>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">Production Pattern: Specific Interception <span class="tag">Clean Code</span></div>
+            <pre class="code-box"><code><span class="kw">try</span>:
+    user_record = fetch_user_data(user_id)
+<span class="kw">except</span> (<span class="type">UserNotFoundError</span>, <span class="type">TimeoutError</span>) <span class="kw">as</span> err:
+    <span class="fn">print</span>(<span class="str">f"Expected operational failure: <span class="op">{</span>err<span class="op">}</span>"</span>)
+    <span class="kw">return</span> fallback_user()</code></pre>
+            <div class="callout">
+              <strong>Best Practice:</strong> Only catch exceptions you know how to recover from. Let unexpected programming bugs fail fast.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">16 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 17: Guided Refactoring Challenge -->
+    <div class="slide" data-slide="17">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Hands-On Practice</div>
+        <h2 class="slide-title">Guided Challenge: Modular Architecture with JSON Persistence</h2>
+        <p class="slide-subtitle">Refactor yesterday's Task script into a robust 3-layer architecture</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Architecture Requirements <span class="tag">Structure</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>1. `models.py`:</strong> Define a <code>Task</code> dataclass with typed fields and a custom <code>TaskNotFoundError</code> exception.</li>
+              <li><strong>2. `services.py`:</strong> Create a <code>TaskManager</code> service with <code>add()</code>, <code>get_by_id()</code>, <code>list_all()</code>, and JSON persistence using <code>pathlib</code> + <code>with open()</code>.</li>
+              <li><strong>3. `main.py`:</strong> CLI driver to create tasks, persist them, and query high-priority items.</li>
+            </ul>
+            <div class="callout">
+              <strong>Notebook Link:</strong> Open <code>02_practical_python.ipynb</code> to run and test!
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Target Flow Architecture <span class="tag">Design</span></div>
+            <div style="background:var(--bg-code); padding:10px; border-radius:6px; font-family:var(--font-mono); font-size:11px; line-height:1.5;">
+              <span style="color:var(--accent-yellow);">main.py</span> (CLI / Driver)<br>
+              &nbsp;&nbsp;↓ calls<br>
+              <span style="color:var(--accent-cyan);">services.py</span> (TaskManager Service)<br>
+              &nbsp;&nbsp;↓ instantiates &amp; validates<br>
+              <span style="color:var(--accent-purple);">models.py</span> (@dataclass Task + Exceptions)<br>
+              &nbsp;&nbsp;↓ reads &amp; writes<br>
+              <span style="color:var(--accent-green);">data/tasks.json</span> (Persistent File)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">17 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 18: Summary & Day 3 Bridge -->
+    <div class="slide" data-slide="18">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Summary &amp; Next Step</div>
+        <h2 class="slide-title">You can now architect and structure maintainable Python applications</h2>
+        <p class="slide-subtitle">Ready to connect your Python applications to external APIs and async I/O</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">What We Mastered Today <span class="tag">Day 2 Review</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Modules &amp; Imports:</strong> Structured multi-file packages and entrypoint guards.</li>
+              <li><strong>Dataclasses:</strong> Clean domain modeling with <code>@dataclass</code>.</li>
+              <li><strong>Filesystem &amp; JSON:</strong> Robust <code>pathlib.Path</code>, <code>json.dump/load</code>, and <code>with</code> context managers.</li>
+              <li><strong>Errors &amp; Functions:</strong> Custom exception hierarchies, <code>*args</code>, <code>**kwargs</code>, and decorators.</li>
+            </ul>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">Coming Up in Day 3: Web &amp; Async Python <span class="tag">Tomorrow</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>HTTPX:</strong> Modern async HTTP client for consuming REST APIs.</li>
+              <li><strong>Async &amp; Coroutines:</strong> <code>async def</code>, <code>await</code>, and <code>asyncio.gather</code> (mapping JS Promises).</li>
+              <li><strong>Generators &amp; Iterables:</strong> Streaming data on demand with <code>yield</code>.</li>
+              <li><strong>HTML Extraction:</strong> Simple web scraping with BeautifulSoup4.</li>
+            </ul>
+            <div class="callout">
+              <strong>Progress:</strong> Moving from local file persistence to web integration and asynchronous I/O!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">18 / 18</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Controls -->
+  <div id="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()" title="Previous (Left Arrow / PageUp)">← Prev</button>
+    <button class="nav-btn" onclick="nextSlide()" title="Next (Right Arrow / Space / PageDown)">Next →</button>
+    <button class="nav-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen (F)">⛶ Fullscreen</button>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progress-bar');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+      const progressPercent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(`Error enabling fullscreen: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        currentSlide = 1;
+        updateSlide();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        currentSlide = totalSlides;
+        updateSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    // Handle responsive container scaling
+    function handleResize() {
+      const container = document.getElementById('deck-container');
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const scaleX = windowWidth / 1280;
+      const scaleY = windowHeight / 720;
+      const scale = Math.min(scaleX, scaleY) * 0.96;
+      container.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    updateSlide();
+  </script>
+</body>
+</html>

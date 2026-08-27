@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 5: SQLite, Full Application &amp; Capstone — Learn Python in 5 Days</title>
+  <style>
+    :root {
+      --bg-primary: #111215;
+      --bg-card: #181a1f;
+      --bg-card-alt: #1f2229;
+      --bg-code: #0b0c0e;
+      --border-color: #2e323b;
+      --border-subtle: #232730;
+      --text-primary: #ffffff;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent-yellow: #ffe600;
+      --accent-yellow-dim: rgba(255, 230, 0, 0.12);
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-rose: #fb7185;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Fira Code", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #08090a;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #deck-container {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      background: var(--bg-primary);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent-yellow);
+      width: 0%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 44px 54px 40px 54px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .slide-header {
+      margin-bottom: 18px;
+    }
+
+    .slide-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-yellow);
+      margin-bottom: 5px;
+    }
+
+    .slide-eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-yellow);
+      border-radius: 2px;
+    }
+
+    .slide-title {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+    }
+
+    .slide-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-1-2 {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-2-1 {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.highlight {
+      border-color: rgba(255, 230, 0, 0.4);
+      background: linear-gradient(180deg, rgba(255, 230, 0, 0.03) 0%, var(--bg-card) 100%);
+    }
+
+    .card-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent-yellow);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--bg-card-alt);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    pre, code {
+      font-family: var(--font-mono);
+    }
+
+    .code-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 11px 13px;
+      font-size: 11.5px;
+      line-height: 1.48;
+      color: #e5e7eb;
+      overflow-x: auto;
+      margin-bottom: 8px;
+      flex: 1;
+    }
+
+    .code-box:last-child {
+      margin-bottom: 0;
+    }
+
+    .code-box code {
+      font-size: 11.5px;
+      white-space: pre;
+    }
+
+    .kw { color: #facc15; font-weight: 600; }
+    .fn { color: #60a5fa; font-weight: 600; }
+    .str { color: #86efac; }
+    .num { color: #f472b6; }
+    .type { color: #c084fc; }
+    .cm { color: #6b7280; font-style: italic; }
+    .op { color: #94a3b8; }
+    .var { color: #e2e8f0; }
+    .dec { color: #fb923c; font-weight: 600; }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .compare-col {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 9px 11px;
+    }
+
+    .compare-col.js {
+      border-top: 2px solid #eab308;
+    }
+
+    .compare-col.py {
+      border-top: 2px solid var(--accent-cyan);
+    }
+
+    .compare-head {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .feature-list li {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.38;
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .feature-list li::before {
+      content: "•";
+      color: var(--accent-yellow);
+      font-size: 15px;
+      position: absolute;
+      left: 3px;
+      top: -2px;
+    }
+
+    .callout {
+      background: var(--accent-yellow-dim);
+      border-left: 3px solid var(--accent-yellow);
+      padding: 7px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      margin-top: auto;
+    }
+
+    .callout strong {
+      color: var(--accent-yellow);
+    }
+
+    .callout-alert {
+      background: rgba(251, 113, 133, 0.1);
+      border-left: 3px solid var(--accent-rose);
+      padding: 7px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: #fecdd3;
+      margin-top: auto;
+    }
+
+    .callout-alert strong {
+      color: var(--accent-rose);
+    }
+
+    .slide-footer {
+      height: 30px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .footer-left {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-item strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .footer-right {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-yellow);
+    }
+
+    #nav-controls {
+      position: fixed;
+      bottom: 16px;
+      right: 24px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      background: rgba(17, 18, 21, 0.85);
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-btn {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
+    .title-slide {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      padding-left: 20px;
+    }
+
+    .title-badge {
+      display: inline-block;
+      background: var(--accent-yellow);
+      color: #000000;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    .main-title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .main-title span {
+      color: var(--accent-yellow);
+    }
+
+    .main-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 840px;
+      line-height: 1.5;
+      margin-bottom: 34px;
+    }
+
+    .title-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 860px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 22px;
+    }
+
+    .meta-box h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .meta-box p {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="deck-container">
+    <div id="progress-bar"></div>
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide active" data-slide="1">
+      <div class="title-slide">
+        <div class="title-badge">Learn Python in 5 Days • Day 5 of 5</div>
+        <h1 class="main-title">SQLite, End-to-End App &amp; <span>Capstone</span></h1>
+        <p class="main-subtitle">
+          Completing the transition from Python foundations to a full-stack persistent application.
+          Relational SQL database integration, parameterized query security, automated testing with pytest, and capstone launch.
+        </p>
+
+        <div class="title-meta-grid">
+          <div class="meta-box">
+            <h4>Format</h4>
+            <p>60 Min • Database &amp; Capstone</p>
+          </div>
+          <div class="meta-box">
+            <h4>Target Outcome</h4>
+            <p>Full-Stack Persistent Application</p>
+          </div>
+          <div class="meta-box">
+            <h4>Technologies</h4>
+            <p>sqlite3 • FastAPI • pytest • uv</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">01 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: The Persistence Layer -->
+    <div class="slide" data-slide="2">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Architecture Milestone</div>
+        <h2 class="slide-title">A real application needs somewhere reliable to persist structured state</h2>
+        <p class="slide-subtitle">Replacing transient in-memory arrays and flat files with ACID relational storage</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">1. Relational Integrity <span class="tag">ACID</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Structured tables with primary keys, unique constraints, and atomic transactions.</p>
+            <div class="callout">
+              <strong>Guarantee:</strong> Prevents corrupted state and duplicate record collisions.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">2. Zero-Config SQLite <span class="tag">Built-in</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Single-file, serverless database engine built directly into the Python standard library.</p>
+            <div class="callout">
+              <strong>Simplicity:</strong> No PostgreSQL or MySQL server setup required for development!
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3. Layered Service <span class="tag">Decoupling</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Database access is isolated in the service layer, keeping API controllers 100% clean.</p>
+            <div class="callout">
+              <strong>Outcome:</strong> Easy to swap SQLite for PostgreSQL in production later.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">02 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: SQLite in One Picture -->
+    <div class="slide" data-slide="3">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Database Fundamentals</div>
+        <h2 class="slide-title">SQLite is a serverless, self-contained, single-file database engine</h2>
+        <p class="slide-subtitle">Why SQLite is the world's most deployed SQL database for desktop, mobile, and small services</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">How SQLite Works Internally <span class="tag">Architecture</span></div>
+            <div style="background:var(--bg-code); padding:12px; border-radius:6px; font-family:var(--font-mono); font-size:11.5px; line-height:1.6;">
+              <span style="color:var(--accent-yellow);">Python Process (FastAPI App)</span><br>
+              &nbsp;&nbsp;↓ Calls built-in C-library bindings<br>
+              <span style="color:var(--accent-cyan);">sqlite3 Standard Module</span><br>
+              &nbsp;&nbsp;↓ Direct file I/O &amp; in-process memory locks<br>
+              <span style="color:var(--accent-green);">app_data.db (Single binary file on disk!)</span>
+            </div>
+            <div class="callout" style="margin-top:10px;">
+              <strong>Key Feature:</strong> Backing up or transferring your entire database is as simple as copying the <code>.db</code> file!
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">When to Use: SQLite vs PostgreSQL <span class="tag">Decision Guide</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Use SQLite for:</strong> Prototyping, CLI tools, local apps, small web APIs (&lt;100k daily requests), testing suites.</li>
+              <li><strong>Move to PostgreSQL when:</strong> You have distributed multi-server deployments, high concurrent write throughput, or advanced row-level replication.</li>
+            </ul>
+            <div class="callout">
+              <strong>Clean Code:</strong> Because we use standard SQL queries, transitioning to Postgres later requires zero changes to your API routes!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">03 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Relational SQL Essentials -->
+    <div class="slide" data-slide="4">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • SQL Syntax</div>
+        <h2 class="slide-title">Essential SQL: Tables, Primary Keys, and CRUD Statements</h2>
+        <p class="slide-subtitle">Creating tables, inserting records, querying rows, and performing updates</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Table Definition &amp; Inserts <span class="tag">DDL &amp; DML</span></div>
+            <pre class="code-box"><code><span class="cm">-- 1. Create Table Schema</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> tasks (
+    id <span class="type">INTEGER PRIMARY KEY AUTOINCREMENT</span>,
+    title <span class="type">TEXT NOT NULL</span>,
+    description <span class="type">TEXT</span>,
+    priority <span class="type">TEXT DEFAULT 'Normal'</span>,
+    completed <span class="type">INTEGER DEFAULT 0</span>,  <span class="cm">-- SQLite uses 0/1 for booleans</span>
+    tags <span class="type">TEXT DEFAULT '[]'</span>,          <span class="cm">-- Stored as JSON text</span>
+    created_at <span class="type">TEXT NOT NULL</span>
+);
+
+<span class="cm">-- 2. Insert Record</span>
+<span class="kw">INSERT INTO</span> tasks (title, priority, created_at)
+<span class="kw">VALUES</span> (<span class="str">'Implement SQLite layer'</span>, <span class="str">'High'</span>, <span class="str">'2026-08-27T12:00:00Z'</span>);</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Querying, Updating &amp; Deleting <span class="tag">CRUD</span></div>
+            <pre class="code-box"><code><span class="cm">-- 3. Select with filters</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> tasks 
+<span class="kw">WHERE</span> completed = <span class="num">0</span> <span class="kw">AND</span> priority = <span class="str">'High'</span> 
+<span class="kw">ORDER BY</span> id <span class="kw">DESC LIMIT</span> <span class="num">10</span>;
+
+<span class="cm">-- 4. Update status</span>
+<span class="kw">UPDATE</span> tasks <span class="kw">SET</span> completed = <span class="num">1</span> <span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="cm">-- 5. Delete record</span>
+<span class="kw">DELETE FROM</span> tasks <span class="kw">WHERE</span> id = <span class="num">1</span>;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">04 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Python sqlite3 Cheatsheet -->
+    <div class="slide" data-slide="5">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Python sqlite3</div>
+        <h2 class="slide-title">Python's <code>sqlite3</code> module manages connections, cursors, and row factories</h2>
+        <p class="slide-subtitle">Setting <code>conn.row_factory = sqlite3.Row</code> to access columns like Python dictionaries</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Connection &amp; Dictionary Row Factory <span class="tag">API</span></div>
+            <pre class="code-box"><code><span class="kw">import</span> sqlite3
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+DB_PATH = Path(__file__).parent / <span class="str">"app.db"</span>
+
+<span class="kw">def</span> <span class="fn">get_db_connection</span>():
+    conn = sqlite3.<span class="fn">connect</span>(DB_PATH)
+    <span class="cm"># Enables dictionary-like column access: row["title"]</span>
+    conn.row_factory = sqlite3.<span class="type">Row</span>
+    <span class="kw">return</span> conn
+
+<span class="cm"># Safe query execution</span>
+<span class="kw">with</span> <span class="fn">get_db_connection</span>() <span class="kw">as</span> conn:
+    cursor = conn.<span class="fn">cursor</span>()
+    cursor.<span class="fn">execute</span>(<span class="str">"SELECT id, title FROM tasks WHERE id = ?"</span>, (<span class="num">1</span>,))
+    row = cursor.<span class="fn">fetchone</span>()
+    <span class="kw">if</span> row:
+        <span class="fn">print</span>(<span class="str">f"Task #<span class="op">{</span>row['id']<span class="op">}</span>: <span class="op">{</span>row['title']<span class="op">}</span>"</span>)</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Key sqlite3 Mechanics <span class="tag">Rules</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>`conn.commit()`:</strong> Saves changes permanently to disk. Wrapping in <code>with conn:</code> automatically commits upon successful block exit!</li>
+              <li><strong>`cursor.lastrowid`:</strong> Returns the auto-incremented integer ID generated by the last `INSERT`.</li>
+              <li><strong>`cursor.fetchall()`:</strong> Returns all matched rows as a list.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">05 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: SQL Injection vs Parameterized Queries -->
+    <div class="slide" data-slide="6">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Security Critical • OWASP #1</div>
+        <h2 class="slide-title">NEVER concatenate raw strings into SQL queries: Always use <code>?</code> placeholders</h2>
+        <p class="slide-subtitle">How string formatting leads to catastrophic SQL injection and how parameterized queries prevent it</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">The Dangerous SQL Injection Vulnerability <span class="tag">Never Do This</span></div>
+            <pre class="code-box"><code><span class="cm"># ❌ VULNERABLE: Direct f-string formatting</span>
+user_search = <span class="str">"'; DROP TABLE tasks; --"</span>
+query = <span class="str">f"SELECT * FROM tasks WHERE title = '<span class="op">{</span>user_search<span class="op">}</span>'"</span>
+
+cursor.<span class="fn">execute</span>(query)
+<span class="cm"># Executes: SELECT * FROM tasks WHERE title = ''; DROP TABLE tasks; --'</span>
+<span class="cm"># Database table is completely destroyed!</span></code></pre>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">The Secure Solution: Parameterized Placeholders <span class="tag">Secure Standard</span></div>
+            <pre class="code-box"><code><span class="cm"># ✅ SECURE: Pass parameters as a separate tuple</span>
+cursor.<span class="fn">execute</span>(
+    <span class="str">"SELECT * FROM tasks WHERE title = ?"</span>,
+    (user_search,)  <span class="cm"># Passed as tuple parameter</span>
+)
+<span class="cm"># SQLite driver treats user_search strictly as literal data!</span></code></pre>
+            <div class="callout">
+              <strong>Rule:</strong> The query string itself must NEVER contain user variables. Always pass values via the tuple parameter argument.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">06 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Structuring the SQLite Database Layer -->
+    <div class="slide" data-slide="7">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Database Architecture</div>
+        <h2 class="slide-title">Isolating schema creation and connections in <code>database.py</code></h2>
+        <p class="slide-subtitle">Creating reusable connection helpers and automatic table initialization on startup</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The `app/database.py` Module <span class="tag">Code</span></div>
+            <pre class="code-box"><code><span class="kw">import</span> sqlite3
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+DB_FILE = Path(__file__).resolve().parent / <span class="str">"tasks.db"</span>
+
+<span class="kw">def</span> <span class="fn">get_db</span>():
+    conn = sqlite3.<span class="fn">connect</span>(DB_FILE)
+    conn.row_factory = sqlite3.<span class="type">Row</span>
+    <span class="kw">return</span> conn
+
+<span class="kw">def</span> <span class="fn">init_db</span>():
+    <span class="kw">with</span> <span class="fn">get_db</span>() <span class="kw">as</span> conn:
+        conn.<span class="fn">execute</span>(<span class="str">"""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            priority TEXT DEFAULT 'Normal',
+            completed INTEGER DEFAULT 0,
+            tags TEXT DEFAULT '[]',
+            created_at TEXT NOT NULL
+        );
+        """</span>)</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Lifespan Startup in FastAPI <span class="tag">Lifecycle</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> contextlib <span class="kw">import</span> asynccontextmanager
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> app.database <span class="kw">import</span> init_db
+
+<span class="dec">@asynccontextmanager</span>
+<span class="kw">async def</span> <span class="fn">lifespan</span>(app: FastAPI):
+    <span class="cm"># Runs ONCE when API boots up</span>
+    <span class="fn">init_db</span>()
+    <span class="kw">yield</span>
+
+app = <span class="type">FastAPI</span>(lifespan=lifespan)</code></pre>
+            <div class="callout">
+              <strong>Startup Hook:</strong> Tables are automatically created if they don't exist before accepting any HTTP requests.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">07 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: End-to-End Request Flow -->
+    <div class="slide" data-slide="8">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Full Stack System</div>
+        <h2 class="slide-title">The Complete End-to-End Request Architecture</h2>
+        <p class="slide-subtitle">Tracing a POST request from the frontend UI all the way to persistent disk storage</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The Request Pipeline <span class="tag">6-Step Flow</span></div>
+            <div style="background:var(--bg-code); padding:12px; border-radius:6px; font-family:var(--font-mono); font-size:11.5px; line-height:1.6;">
+              <span style="color:var(--accent-yellow);">1. Frontend Client (React / Fetch)</span><br>
+              &nbsp;&nbsp;<code>POST /tasks {"title": "Deploy API", "priority": "High"}</code><br>
+              <span style="color:var(--accent-cyan);">2. FastAPI Router (app/main.py)</span><br>
+              &nbsp;&nbsp;Matches endpoint and delegates to service<br>
+              <span style="color:var(--accent-green);">3. Pydantic Validation (app/models.py)</span><br>
+              &nbsp;&nbsp;Validates <code>TaskCreate</code> schema constraints<br>
+              <span style="color:var(--accent-purple);">4. Service Layer (app/services.py)</span><br>
+              &nbsp;&nbsp;Executes SQL INSERT query via <code>app/database.py</code><br>
+              <span style="color:var(--accent-rose);">5. SQLite Storage (app/tasks.db)</span><br>
+              &nbsp;&nbsp;Commits row to disk, returns <code>lastrowid</code><br>
+              <span style="color:var(--text-primary);">6. JSON Response (HTTP 201 Created)</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Key Architectural Advantages <span class="tag">Decoupling</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Zero SQL in Routes:</strong> Route functions never touch SQL strings directly.</li>
+              <li><strong>Type-Safe Boundary:</strong> Data entering and exiting the service is strictly structured via Pydantic models.</li>
+              <li><strong>Independent Layers:</strong> The database layer, service layer, and HTTP layer can each be tested in isolation.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">08 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Automated Testing with pytest -->
+    <div class="slide" data-slide="9">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Testing</div>
+        <h2 class="slide-title">Automated testing with <code>pytest</code> and FastAPI's <code>TestClient</code></h2>
+        <p class="slide-subtitle">Writing readable unit and integration test functions without complex test runners</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Writing Tests with `pytest` <span class="tag">tests/test_api.py</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> fastapi.testclient <span class="kw">import</span> TestClient
+<span class="kw">from</span> app.main <span class="kw">import</span> app
+
+client = <span class="type">TestClient</span>(app)
+
+<span class="kw">def</span> <span class="fn">test_root_health</span>():
+    res = client.<span class="fn">get</span>(<span class="str">"/"</span>)
+    <span class="kw">assert</span> res.status_code == <span class="num">200</span>
+    <span class="kw">assert</span> res.json()[<span class="str">"status"</span>] == <span class="str">"online"</span>
+
+<span class="kw">def</span> <span class="fn">test_create_and_get_task</span>():
+    <span class="cm"># 1. Create</span>
+    create_res = client.<span class="fn">post</span>(
+        <span class="str">"/tasks"</span>,
+        json={<span class="str">"title"</span>: <span class="str">"Write pytest suite"</span>, <span class="str">"priority"</span>: <span class="str">"High"</span>}
+    )
+    <span class="kw">assert</span> create_res.status_code == <span class="num">201</span>
+    task_id = create_res.json()[<span class="str">"id"</span>]
+
+    <span class="cm"># 2. Fetch</span>
+    get_res = client.<span class="fn">get</span>(<span class="str">f"/tasks/<span class="op">{</span>task_id<span class="op">}</span>"</span>)
+    <span class="kw">assert</span> get_res.status_code == <span class="num">200</span>
+    <span class="kw">assert</span> get_res.json()[<span class="str">"title"</span>] == <span class="str">"Write pytest suite"</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Running Tests with `uv` <span class="tag">CLI</span></div>
+            <pre class="code-box"><code><span class="cm"># 1. Add pytest to project</span>
+<span class="var">$</span> uv add --dev pytest
+
+<span class="cm"># 2. Run test suite</span>
+<span class="var">$</span> uv run pytest
+
+<span class="cm"># Output:</span>
+<span class="cm"># ================= test session starts =================</span>
+<span class="cm"># tests/test_api.py ..                            [100%]</span>
+<span class="cm"># ================== 2 passed in 0.15s ==================</span></code></pre>
+            <div class="callout">
+              <strong>Simplicity:</strong> No Jest configurations or Babel transforms required!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">09 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Production Readiness Checklist -->
+    <div class="slide" data-slide="10">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Engineering Excellence</div>
+        <h2 class="slide-title">What separates prototype demos from enterprise Python applications</h2>
+        <p class="slide-subtitle">The 5 key engineering practices to implement when taking Python services into production</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Production Readiness Checklist <span class="tag">Checklist</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>1. Environment Configuration:</strong> Store API keys and database URLs in environment variables (never hardcoded in source code).</li>
+              <li><strong>2. Structured Logging:</strong> Replace <code>print()</code> statements with Python's standard <code>logging</code> module or JSON loggers.</li>
+              <li><strong>3. Database Migrations:</strong> Use migration tools (like Alembic) when schemas evolve in production databases.</li>
+              <li><strong>4. Connection Limits:</strong> Set connection pools and timeouts on external database and HTTP calls.</li>
+              <li><strong>5. Automated Testing:</strong> Maintain CI/CD pipelines running <code>pytest</code> and linting via <code>ruff</code>.</li>
+            </ul>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">The Enterprise Python Stack <span class="tag">Production Standard</span></div>
+            <div style="background:var(--bg-code); padding:10px; border-radius:6px; font-family:var(--font-mono); font-size:11.5px; line-height:1.5;">
+              <span style="color:var(--accent-yellow);">Package Manager:</span> uv<br>
+              <span style="color:var(--accent-cyan);">Web Framework:</span> FastAPI + Uvicorn<br>
+              <span style="color:var(--accent-green);">Data Validation:</span> Pydantic v2<br>
+              <span style="color:var(--accent-purple);">Database:</span> PostgreSQL / SQLite + SQLAlchemy<br>
+              <span style="color:var(--text-secondary);">Testing &amp; Linting:</span> pytest + ruff<br>
+              <span style="color:var(--accent-rose);">Containerization:</span> Multi-stage Docker
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">10 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: 5-Day Retrospective -->
+    <div class="slide" data-slide="11">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Course Retrospective</div>
+        <h2 class="slide-title">From Python syntax to full-stack application architecture in 5 days</h2>
+        <p class="slide-subtitle">A review of the complete journey from Day 1 fundamentals to Day 5 persistent APIs</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">Days 1 &amp; 2 <span class="tag">Language &amp; Code</span></div>
+            <ul class="feature-list">
+              <li>Python mental model vs JS</li>
+              <li>Collections &amp; comprehensions</li>
+              <li>Modules &amp; Packages</li>
+              <li>Dataclasses &amp; `pathlib`</li>
+              <li>Context managers &amp; decorators</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Day 3 <span class="tag">Web &amp; Async</span></div>
+            <ul class="feature-list">
+              <li>HTTPX REST client</li>
+              <li>Coroutines vs Promises</li>
+              <li>Parallel `asyncio.gather`</li>
+              <li>Streaming with generators</li>
+              <li>BeautifulSoup4 scraping</li>
+            </ul>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">Days 4 &amp; 5 <span class="tag">APIs &amp; Database</span></div>
+            <ul class="feature-list">
+              <li>FastAPI routing &amp; auto docs</li>
+              <li>Pydantic runtime validation</li>
+              <li>SQLite parameterized queries</li>
+              <li>Decoupled 3-layer architecture</li>
+              <li>Automated testing with pytest</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">11 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Capstone Philosophy -->
+    <div class="slide" data-slide="12">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Capstone Launch</div>
+        <h2 class="slide-title">Combine your existing frontend expertise with your new Python skills</h2>
+        <p class="slide-subtitle">The capstone is your opportunity to build a real-world, portfolio-grade project</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The Guiding Question <span class="tag">Mindset</span></div>
+            <blockquote style="font-size:14px; font-weight:600; color:var(--accent-yellow); line-height:1.5; border-left:3px solid var(--accent-yellow); padding-left:14px; margin-bottom:12px;">
+              "What useful thing can I build now using Python together with the skills I already have?"
+            </blockquote>
+            <p style="font-size:12.5px; color:var(--text-secondary); line-height:1.4;">
+              As frontend and full-stack developers, you don't need to build isolated CLI scripts. Pair React, Vue, or Next.js with a robust FastAPI + SQLite backend or automation service!
+            </p>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">Core Capstone Requirements <span class="tag">Standard</span></div>
+            <ul class="feature-list">
+              <li><strong>Python &amp; uv:</strong> Configured with <code>pyproject.toml</code> and <code>uv</code>.</li>
+              <li><strong>Meaningful Python Component:</strong> FastAPI service, async worker, or scraper.</li>
+              <li><strong>Working User Interface:</strong> Web dashboard, interactive CLI, or REST API.</li>
+              <li><strong>Persistence:</strong> SQLite database or structured JSON storage.</li>
+              <li><strong>Documentation &amp; Tests:</strong> Clean README with setup steps and pytest verification.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">12 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Capstone Track 1 - Expense Tracker -->
+    <div class="slide" data-slide="13">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Capstone Option 1</div>
+        <h2 class="slide-title">Track 1: Full-Stack Expense Tracker &amp; Financial Dashboard</h2>
+        <p class="slide-subtitle">A high-utility financial analytics API with category aggregations and spending charts</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Python Backend Responsibilities <span class="tag">Backend</span></div>
+            <ul class="feature-list">
+              <li><strong>FastAPI Endpoints:</strong> CRUD for expenses (`amount`, `category`, `date`, `notes`).</li>
+              <li><strong>Pydantic Schemas:</strong> Amount validation (`gt=0`), category enumerations.</li>
+              <li><strong>SQLite Aggregations:</strong> `SUM()`, `GROUP BY category`, monthly spending totals.</li>
+              <li><strong>CSV Export:</strong> Streaming CSV download using Python generators.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Frontend &amp; UI Integration <span class="tag">Frontend</span></div>
+            <ul class="feature-list">
+              <li>Expense entry form with live validation.</li>
+              <li>Monthly spending breakdown chart (Chart.js / Recharts).</li>
+              <li>Category filter pills and date range selector.</li>
+              <li>Real-time budget limit progress bar.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">13 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: Capstone Track 2 - Bookmark Manager -->
+    <div class="slide" data-slide="14">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Capstone Option 2</div>
+        <h2 class="slide-title">Track 2: Automated Bookmark Manager &amp; Metadata Harvester</h2>
+        <p class="slide-subtitle">Save URLs and automatically extract OpenGraph titles, descriptions, and favicons</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Python Backend Responsibilities <span class="tag">Backend</span></div>
+            <ul class="feature-list">
+              <li><strong>URL Harvester:</strong> When URL is submitted, HTTPX fetches the page.</li>
+              <li><strong>BeautifulSoup4:</strong> Extracts `<title>`, `<meta property="og:description">`, and images.</li>
+              <li><strong>SQLite Store:</strong> Persists enriched bookmarks with tags and reading status.</li>
+              <li><strong>Async Concurrency:</strong> Bulk URL import with `asyncio.gather()`.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Frontend UI &amp; Optional AI Extension <span class="tag">Features</span></div>
+            <ul class="feature-list">
+              <li>Rich card preview board displaying page metadata and favicon.</li>
+              <li>Full-text search across titles and descriptions.</li>
+              <li>Tag filter clouds and archive tabs.</li>
+              <li><em>Optional Extension:</em> LLM prompt generating 2-sentence summaries.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">14 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: Capstone Track 3 - Uptime Monitor -->
+    <div class="slide" data-slide="15">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Capstone Option 3</div>
+        <h2 class="slide-title">Track 3: Real-Time Website &amp; API Uptime Monitor</h2>
+        <p class="slide-subtitle">Periodically pings services, records response times, and visualizes system status</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Python Backend Responsibilities <span class="tag">Backend</span></div>
+            <ul class="feature-list">
+              <li><strong>Async Health Checker:</strong> Pings registered URLs concurrently using HTTPX.</li>
+              <li><strong>Latency History:</strong> Records timestamp, status code, and latency in SQLite.</li>
+              <li><strong>FastAPI Endpoints:</strong> Serves uptime percentages, average response times, and incident logs.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Frontend UI &amp; Dashboard <span class="tag">Dashboard</span></div>
+            <ul class="feature-list">
+              <li>Service status cards (Green / Amber / Red indicators).</li>
+              <li>Historical latency sparkline charts.</li>
+              <li>Incident timeline showing downtime periods.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">15 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 16: Capstone Track 4 - GitHub Dashboard -->
+    <div class="slide" data-slide="16">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Capstone Option 4</div>
+        <h2 class="slide-title">Track 4: GitHub Metrics &amp; Developer Analytics Dashboard</h2>
+        <p class="slide-subtitle">Consuming public GitHub APIs, caching repository analytics, and charting growth</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Python Backend Responsibilities <span class="tag">Backend</span></div>
+            <ul class="feature-list">
+              <li><strong>GitHub API Integration:</strong> Fetches star history, open issues, PR activity, and language distributions.</li>
+              <li><strong>SQLite Caching:</strong> Caches API responses to avoid hitting rate limits.</li>
+              <li><strong>Comparison Engine:</strong> Computes metrics between multiple repositories.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Frontend UI &amp; Exploration <span class="tag">Visuals</span></div>
+            <ul class="feature-list">
+              <li>Repository search bar with autocomplete.</li>
+              <li>Language breakdown doughnut chart.</li>
+              <li>Side-by-side repository comparison matrix.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">16 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 17: Capstone Evaluation Rubric -->
+    <div class="slide" data-slide="17">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Submission Standards</div>
+        <h2 class="slide-title">Capstone Evaluation Rubric: Delivering High-Quality Python Code</h2>
+        <p class="slide-subtitle">Clear criteria focused on engineering craftsmanship, clarity, and maintainability</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-4">
+          <div class="card">
+            <div class="card-title">1. Code Structure <span class="tag">25%</span></div>
+            <p style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">
+              Clean modular layout (`app/models.py`, `services.py`, `main.py`). Thin routes with decoupled business logic.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">2. Persistence <span class="tag">25%</span></div>
+            <p style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">
+              Parameterized SQL queries (`?` placeholders). Safe transactions and error handling with `try / except`.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3. Usability <span class="tag">25%</span></div>
+            <p style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">
+              Functional frontend dashboard or responsive CLI. Clear OpenAPI Swagger documentation at `/docs`.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">4. Testing &amp; Docs <span class="tag">25%</span></div>
+            <p style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">
+              Comprehensive README with exact `uv` setup steps. Minimum of 3 passing `pytest` automated test cases.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">17 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 18: Where to Go Next -->
+    <div class="slide" data-slide="18">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Graduation &amp; Next Steps</div>
+        <h2 class="slide-title">You now have a solid, modern Python foundation: Where to go next</h2>
+        <p class="slide-subtitle">Specialized pathways to continue expanding your Python expertise</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">1. Backend &amp; Cloud <span class="tag">Scale</span></div>
+            <ul class="feature-list">
+              <li>PostgreSQL with SQLAlchemy 2.0 / SQLModel</li>
+              <li>Dockerizing FastAPI applications</li>
+              <li>Authentication with OAuth2 / JWT</li>
+              <li>Background queues with Celery / Redis</li>
+            </ul>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">2. AI &amp; LLM Engineering <span class="tag">AI Stack</span></div>
+            <ul class="feature-list">
+              <li>Building RAG pipelines with LangChain / LlamaIndex</li>
+              <li>Vector databases (Chroma, Qdrant, Pinecone)</li>
+              <li>Function calling &amp; Structured Outputs with Pydantic</li>
+              <li>Autonomous AI Agents with Antigravity</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3. Data &amp; Automation <span class="tag">Analytics</span></div>
+            <ul class="feature-list">
+              <li>Pandas &amp; Polars for data analysis</li>
+              <li>Data visualization with Matplotlib / Plotly</li>
+              <li>Headless browser automation with Playwright</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">18 / 18</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Controls -->
+  <div id="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()" title="Previous (Left Arrow / PageUp)">← Prev</button>
+    <button class="nav-btn" onclick="nextSlide()" title="Next (Right Arrow / Space / PageDown)">Next →</button>
+    <button class="nav-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen (F)">⛶ Fullscreen</button>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progress-bar');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+      const progressPercent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(`Error enabling fullscreen: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        currentSlide = 1;
+        updateSlide();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        currentSlide = totalSlides;
+        updateSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    function handleResize() {
+      const container = document.getElementById('deck-container');
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const scaleX = windowWidth / 1280;
+      const scaleY = windowHeight / 720;
+      const scale = Math.min(scaleX, scaleY) * 0.96;
+      container.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    updateSlide();
+  </script>
+</body>
+</html>

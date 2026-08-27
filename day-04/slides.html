@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 4: FastAPI + Pydantic — Learn Python in 5 Days</title>
+  <style>
+    :root {
+      --bg-primary: #111215;
+      --bg-card: #181a1f;
+      --bg-card-alt: #1f2229;
+      --bg-code: #0b0c0e;
+      --border-color: #2e323b;
+      --border-subtle: #232730;
+      --text-primary: #ffffff;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent-yellow: #ffe600;
+      --accent-yellow-dim: rgba(255, 230, 0, 0.12);
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-rose: #fb7185;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Fira Code", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #08090a;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #deck-container {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      background: var(--bg-primary);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent-yellow);
+      width: 0%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 44px 54px 40px 54px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .slide-header {
+      margin-bottom: 18px;
+    }
+
+    .slide-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-yellow);
+      margin-bottom: 5px;
+    }
+
+    .slide-eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-yellow);
+      border-radius: 2px;
+    }
+
+    .slide-title {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+    }
+
+    .slide-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-1-2 {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid-2-1 {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.highlight {
+      border-color: rgba(255, 230, 0, 0.4);
+      background: linear-gradient(180deg, rgba(255, 230, 0, 0.03) 0%, var(--bg-card) 100%);
+    }
+
+    .card-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent-yellow);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--bg-card-alt);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    pre, code {
+      font-family: var(--font-mono);
+    }
+
+    .code-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 11px 13px;
+      font-size: 11.5px;
+      line-height: 1.48;
+      color: #e5e7eb;
+      overflow-x: auto;
+      margin-bottom: 8px;
+      flex: 1;
+    }
+
+    .code-box:last-child {
+      margin-bottom: 0;
+    }
+
+    .code-box code {
+      font-size: 11.5px;
+      white-space: pre;
+    }
+
+    .kw { color: #facc15; font-weight: 600; }
+    .fn { color: #60a5fa; font-weight: 600; }
+    .str { color: #86efac; }
+    .num { color: #f472b6; }
+    .type { color: #c084fc; }
+    .cm { color: #6b7280; font-style: italic; }
+    .op { color: #94a3b8; }
+    .var { color: #e2e8f0; }
+    .dec { color: #fb923c; font-weight: 600; }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .compare-col {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 9px 11px;
+    }
+
+    .compare-col.js {
+      border-top: 2px solid #eab308;
+    }
+
+    .compare-col.py {
+      border-top: 2px solid var(--accent-cyan);
+    }
+
+    .compare-head {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .feature-list li {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.38;
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .feature-list li::before {
+      content: "•";
+      color: var(--accent-yellow);
+      font-size: 15px;
+      position: absolute;
+      left: 3px;
+      top: -2px;
+    }
+
+    .callout {
+      background: var(--accent-yellow-dim);
+      border-left: 3px solid var(--accent-yellow);
+      padding: 7px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      margin-top: auto;
+    }
+
+    .callout strong {
+      color: var(--accent-yellow);
+    }
+
+    .callout-alert {
+      background: rgba(251, 113, 133, 0.1);
+      border-left: 3px solid var(--accent-rose);
+      padding: 7px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: #fecdd3;
+      margin-top: auto;
+    }
+
+    .callout-alert strong {
+      color: var(--accent-rose);
+    }
+
+    .slide-footer {
+      height: 30px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .footer-left {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-item strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .footer-right {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-yellow);
+    }
+
+    #nav-controls {
+      position: fixed;
+      bottom: 16px;
+      right: 24px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      background: rgba(17, 18, 21, 0.85);
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-btn {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
+    .title-slide {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      padding-left: 20px;
+    }
+
+    .title-badge {
+      display: inline-block;
+      background: var(--accent-yellow);
+      color: #000000;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    .main-title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .main-title span {
+      color: var(--accent-yellow);
+    }
+
+    .main-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 840px;
+      line-height: 1.5;
+      margin-bottom: 34px;
+    }
+
+    .title-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 860px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 22px;
+    }
+
+    .meta-box h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .meta-box p {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="deck-container">
+    <div id="progress-bar"></div>
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide active" data-slide="1">
+      <div class="title-slide">
+        <div class="title-badge">Learn Python in 5 Days • Day 4 of 5</div>
+        <h1 class="main-title">FastAPI &amp; <span>Pydantic</span></h1>
+        <p class="main-subtitle">
+          Building production-grade, strongly typed REST APIs. Automatic request validation, OpenAPI Swagger docs,
+          async route controllers, and clean layered architecture designed for frontend consumption.
+        </p>
+
+        <div class="title-meta-grid">
+          <div class="meta-box">
+            <h4>Format</h4>
+            <p>60 Min • Cheatsheet &amp; App Code</p>
+          </div>
+          <div class="meta-box">
+            <h4>Target Outcome</h4>
+            <p>Complete REST API Backend</p>
+          </div>
+          <div class="meta-box">
+            <h4>Core Frameworks</h4>
+            <p>FastAPI • Pydantic v2 • Uvicorn</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">01 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Full-Stack Web Boundary -->
+    <div class="slide" data-slide="2">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Architecture Overview</div>
+        <h2 class="slide-title">FastAPI gives JavaScript developers a high-speed, intuitive web boundary</h2>
+        <p class="slide-subtitle">How FastAPI bridges frontend UI frameworks with Python services and data stores</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">1. Type Safety <span class="tag">Pydantic</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">TypeScript-like schemas enforced at runtime. Rejects invalid JSON automatically.</p>
+            <div class="callout">
+              <strong>JS Analogy:</strong> Like TypeScript + Zod schema validation combined natively into the web framework.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">2. Auto Docs <span class="tag">OpenAPI</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Zero-configuration Swagger UI generated in real-time from Python type hints.</p>
+            <div class="callout">
+              <strong>Interactive:</strong> Test endpoints directly at <code>/docs</code> without Postman.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">3. Async Engine <span class="tag">Starlette + Uvicorn</span></div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">High-concurrency ASGI server matching Node.js / Go network performance.</p>
+            <div class="callout">
+              <strong>Performance:</strong> One of the fastest Python web frameworks in existence.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">02 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The FastAPI Technology Stack -->
+    <div class="slide" data-slide="3">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Framework Architecture</div>
+        <h2 class="slide-title">FastAPI combines Uvicorn, Starlette, and Pydantic into a unified engine</h2>
+        <p class="slide-subtitle">Understanding the tripartite architecture powering modern Python web services</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The Three Pillars <span class="tag">Components</span></div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="background:var(--bg-code); padding:9px 12px; border-radius:6px; border-left:3px solid var(--accent-yellow);">
+                <div style="color:var(--accent-yellow); font-size:12px; font-weight:700;">1. Uvicorn (ASGI Web Server)</div>
+                <div style="color:var(--text-secondary); font-size:11px;">Lightning-fast ASGI server implementation (like Node.js http server or Bun).</div>
+              </div>
+              <div style="background:var(--bg-code); padding:9px 12px; border-radius:6px; border-left:3px solid var(--accent-cyan);">
+                <div style="color:var(--accent-cyan); font-size:12px; font-weight:700;">2. Starlette (Routing &amp; HTTP Toolkit)</div>
+                <div style="color:var(--text-secondary); font-size:11px;">Provides core routing, middleware, WebSocket support, and request/response life cycle.</div>
+              </div>
+              <div style="background:var(--bg-code); padding:9px 12px; border-radius:6px; border-left:3px solid var(--accent-green);">
+                <div style="color:var(--accent-green); font-size:12px; font-weight:700;">3. Pydantic (Data Validation &amp; Schemas)</div>
+                <div style="color:var(--text-secondary); font-size:11px;">Parses, validates, and serializes all JSON payloads and generates OpenAPI specifications.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Installation &amp; Launch <span class="tag">CLI Workflow</span></div>
+            <pre class="code-box"><code><span class="cm"># 1. Install FastAPI and Uvicorn server via uv</span>
+<span class="var">$</span> uv add "fastapi[standard]"
+
+<span class="cm"># 2. Run the development server with live reload</span>
+<span class="var">$</span> uv run fastapi dev app/main.py
+
+<span class="cm"># Or using standard uvicorn command:</span>
+<span class="var">$</span> uv run uvicorn app.main:app --reload --port 8000</code></pre>
+            <div class="callout">
+              <strong>URL:</strong> Live API at <code>http://localhost:8000</code> | Docs at <code>http://localhost:8000/docs</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">03 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Your First FastAPI Application -->
+    <div class="slide" data-slide="4">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • First Endpoint</div>
+        <h2 class="slide-title">Defining API endpoints using decorators: <code>@app.get()</code> and <code>@app.post()</code></h2>
+        <p class="slide-subtitle">Creating the application instance, returning dictionaries as JSON, and automatic OpenAPI docs</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Minimal API Application <span class="tag">app/main.py</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, status
+
+app = <span class="type">FastAPI</span>(
+    title=<span class="str">"Task Manager API"</span>,
+    version=<span class="str">"1.0.0"</span>,
+    description=<span class="str">"Modern Task API for full-stack integration"</span>
+)
+
+<span class="dec">@app.get</span>(<span class="str">"/"</span>)
+<span class="kw">def</span> <span class="fn">root</span>():
+    <span class="cm"># Dictionaries are automatically serialized to JSON!</span>
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"online"</span>, <span class="str">"version"</span>: <span class="str">"1.0.0"</span>}
+
+<span class="dec">@app.get</span>(<span class="str">"/health"</span>, status_code=status.HTTP_200_OK)
+<span class="kw">def</span> <span class="fn">health_check</span>():
+    <span class="kw">return</span> {<span class="str">"health"</span>: <span class="str">"healthy"</span>, <span class="str">"timestamp"</span>: <span class="str">"2026-08-27T12:00:00Z"</span>}</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Express.js vs FastAPI <span class="tag">Comparison</span></div>
+            <div class="compare-grid" style="margin-bottom:10px;">
+              <div class="compare-col js">
+                <div class="compare-head">Express.js (Node)</div>
+                <code style="font-size:11px;">app.get("/health", (req, res) => {<br>  res.status(200).json({<br>    health: "healthy"<br>  });<br>});</code>
+              </div>
+              <div class="compare-col py">
+                <div class="compare-head">FastAPI (Python)</div>
+                <code style="font-size:11px;">@app.get("/health")<br>def health_check():<br>  return {<br>    "health": "healthy"<br>  }</code>
+              </div>
+            </div>
+            <div class="callout">
+              <strong>Key Advantage:</strong> In FastAPI, returning a dictionary automatically sets <code>Content-Type: application/json</code> and <code>200 OK</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">04 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Route Parameters Cheatsheet -->
+    <div class="slide" data-slide="5">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Routing</div>
+        <h2 class="slide-title">Path parameters and query parameters are declared directly as function arguments</h2>
+        <p class="slide-subtitle">FastAPI automatically coerces types (e.g. string to int) and validates query defaults</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Path &amp; Query Parameters <span class="tag">Syntax</span></div>
+            <pre class="code-box"><code><span class="cm"># 1. Path Parameter: Declared in path template {task_id}</span>
+<span class="dec">@app.get</span>(<span class="str">"/tasks/{task_id}"</span>)
+<span class="kw">def</span> <span class="fn">get_task</span>(task_id: <span class="type">int</span>):
+    <span class="cm"># If caller passes "/tasks/abc", FastAPI returns 422 immediately!</span>
+    <span class="kw">return</span> {<span class="str">"task_id"</span>: task_id, <span class="str">"title"</span>: <span class="str">f"Task #<span class="op">{</span>task_id<span class="op">}</span>"</span>}
+
+<span class="cm"># 2. Query Parameters: Any argument NOT in path template</span>
+<span class="dec">@app.get</span>(<span class="str">"/tasks"</span>)
+<span class="kw">def</span> <span class="fn">list_tasks</span>(
+    status: <span class="type">str</span> = <span class="str">"all"</span>,        <span class="cm"># Default "all"</span>
+    limit: <span class="type">int</span> = <span class="num">10</span>,           <span class="cm"># Default 10</span>
+    completed: <span class="type">bool</span> | <span class="type">None</span> = <span class="kw">None</span> <span class="cm"># Optional bool filter</span>
+):
+    <span class="kw">return</span> {<span class="str">"status"</span>: status, <span class="str">"limit"</span>: limit, <span class="str">"completed"</span>: completed}</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Parameter Classification Rules <span class="tag">Rules</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Path Parameter:</strong> If a function parameter name matches a <code>{param}</code> in the URL path, it is extracted from the URL path.</li>
+              <li><strong>Query Parameter:</strong> If a parameter has a primitive type (<code>str</code>, <code>int</code>, <code>bool</code>) and is NOT in the path, it is parsed from query strings (<code>?limit=20</code>).</li>
+              <li><strong>Request Body:</strong> If a parameter is typed as a Pydantic <code>BaseModel</code>, it is parsed from the JSON body!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">05 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Pydantic BaseModel Cheatsheet -->
+    <div class="slide" data-slide="6">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Pydantic v2</div>
+        <h2 class="slide-title">Pydantic <code>BaseModel</code> guarantees runtime type safety and parsing</h2>
+        <p class="slide-subtitle">Defining request payloads that validate incoming JSON and reject malformed requests with HTTP 422</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Defining Schemas with <code>BaseModel</code> <span class="tag">Schemas</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+
+<span class="kw">class</span> <span class="type">TaskCreate</span>(<span class="type">BaseModel</span>):
+    title: <span class="type">str</span>
+    priority: <span class="type">str</span> = <span class="str">"Normal"</span>
+    completed: <span class="type">bool</span> = <span class="kw">False</span>
+    tags: <span class="type">list</span>[<span class="type">str</span>] = []
+
+<span class="dec">@app.post</span>(<span class="str">"/tasks"</span>, status_code=status.HTTP_201_CREATED)
+<span class="kw">def</span> <span class="fn">create_task</span>(payload: <span class="type">TaskCreate</span>):
+    <span class="cm"># payload is a validated Pydantic model instance!</span>
+    <span class="fn">print</span>(<span class="str">f"Creating: <span class="op">{</span>payload.title<span class="op">}</span> (Priority: <span class="op">{</span>payload.priority<span class="op">}</span>)"</span>)
+    <span class="kw">return</span> {<span class="str">"id"</span>: <span class="num">101</span>, **payload.<span class="fn">model_dump</span>()}</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">TypeScript Interface vs Pydantic Model <span class="tag">Runtime vs Static</span></div>
+            <div class="compare-grid" style="margin-bottom:8px;">
+              <div class="compare-col js">
+                <div class="compare-head">TypeScript Interface</div>
+                <code style="font-size:11px;">interface TaskCreate {<br>  title: string;<br>  priority?: string;<br>}<br>// Disappears at runtime!</code>
+              </div>
+              <div class="compare-col py">
+                <div class="compare-head">Pydantic BaseModel</div>
+                <code style="font-size:11px;">class TaskCreate(BaseModel):<br>  title: str<br>  priority: str = "Normal"<br># Enforced at runtime!</code>
+              </div>
+            </div>
+            <div class="callout">
+              <strong>Zod Comparison:</strong> Pydantic in Python plays the exact role of <code>z.object({ title: z.string() })</code> in TypeScript.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">06 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Advanced Pydantic Validation & Field -->
+    <div class="slide" data-slide="7">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Validation Rules</div>
+        <h2 class="slide-title"><code>Field(...)</code> adds constraints, descriptions, and defaults to schemas</h2>
+        <p class="slide-subtitle">Enforcing string lengths, numeric ranges, and regex patterns directly in the model definition</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Constraint Rules with <code>Field</code> <span class="tag">Validation</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+
+<span class="kw">class</span> <span class="type">TaskCreateRequest</span>(<span class="type">BaseModel</span>):
+    title: <span class="type">str</span> = Field(
+        min_length=<span class="num">3</span>,
+        max_length=<span class="num">100</span>,
+        description=<span class="str">"The title of the task"</span>,
+        examples=[<span class="str">"Deploy staging cluster"</span>]
+    )
+    priority: <span class="type">str</span> = Field(
+        default=<span class="str">"Normal"</span>,
+        pattern=<span class="str">"^(Low|Normal|High|Urgent)$"</span>
+    )
+    estimated_hours: <span class="type">float</span> = Field(
+        default=<span class="num">1.0</span>,
+        gt=<span class="num">0</span>,
+        le=<span class="num">80.0</span>
+    )</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Automatic 422 Error Response <span class="tag">Zero Code Error Handling</span></div>
+            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">If a client sends <code>{"title": "ab", "priority": "Invalid"}</code>, FastAPI automatically returns HTTP 422:</p>
+            <pre class="code-box"><code>{
+  <span class="str">"detail"</span>: [
+    {
+      <span class="str">"loc"</span>: [<span class="str">"body"</span>, <span class="str">"title"</span>],
+      <span class="str">"msg"</span>: <span class="str">"String should have at least 3 characters"</span>,
+      <span class="str">"type"</span>: <span class="str">"string_too_short"</span>
+    }
+  ]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">07 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Response Models & Data Filtering -->
+    <div class="slide" data-slide="8">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Response Models</div>
+        <h2 class="slide-title"><code>response_model</code> filters sensitive fields and documents API responses</h2>
+        <p class="slide-subtitle">Preventing secret data leaks (like passwords or internal hashes) before sending JSON to the client</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Separating Request &amp; Response Schemas <span class="tag">Pattern</span></div>
+            <pre class="code-box"><code><span class="kw">class</span> <span class="type">UserCreate</span>(<span class="type">BaseModel</span>):
+    username: <span class="type">str</span>
+    email: <span class="type">str</span>
+    password: <span class="type">str</span>  <span class="cm"># Incoming plain password</span>
+
+<span class="kw">class</span> <span class="type">UserResponse</span>(<span class="type">BaseModel</span>):
+    id: <span class="type">int</span>
+    username: <span class="type">str</span>
+    email: <span class="type">str</span>
+    <span class="cm"># Notice: password is OMITTED!</span>
+
+<span class="dec">@app.post</span>(<span class="str">"/users"</span>, response_model=<span class="type">UserResponse</span>)
+<span class="kw">def</span> <span class="fn">register_user</span>(user_in: <span class="type">UserCreate</span>):
+    user_db_record = user_service.<span class="fn">create</span>(user_in)
+    <span class="kw">return</span> user_db_record  <span class="cm"># FastAPI filters out password automatically!</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Benefits of `response_model` <span class="tag">Security</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Data Masking:</strong> Automatic stripping of internal fields not declared in the response model.</li>
+              <li><strong>Swagger Accuracy:</strong> OpenAPI documentation displays exact JSON return shape for frontend consumers.</li>
+              <li><strong>Data Conversion:</strong> Automatically converts Python Dataclasses and ORM objects into JSON-compliant dictionaries.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">08 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: The Request Lifecycle Diagram -->
+    <div class="slide" data-slide="9">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Architecture Flow</div>
+        <h2 class="slide-title">The Complete FastAPI Request &amp; Response Lifecycle</h2>
+        <p class="slide-subtitle">How HTTP requests flow through validation, controllers, and services to return structured JSON</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">The 5-Stage Lifecycle <span class="tag">Flow</span></div>
+            <div style="background:var(--bg-code); padding:12px; border-radius:6px; font-family:var(--font-mono); font-size:11.5px; line-height:1.6;">
+              <span style="color:var(--accent-yellow);">1. HTTP Request from Client (React / Mobile)</span><br>
+              &nbsp;&nbsp;↓ URL, Headers, JSON Body<br>
+              <span style="color:var(--accent-cyan);">2. FastAPI Routing Engine</span><br>
+              &nbsp;&nbsp;↓ Matches <code>/tasks/{id}</code> and HTTP Method<br>
+              <span style="color:var(--accent-green);">3. Pydantic Runtime Validation</span><br>
+              &nbsp;&nbsp;↓ Invalid -> Returns 422 immediately<br>
+              <span style="color:var(--accent-purple);">4. Service Layer Execution</span><br>
+              &nbsp;&nbsp;↓ Queries memory / SQLite / external API<br>
+              <span style="color:var(--text-primary);">5. JSON Serialization &amp; Response Model Filtering</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Clean Separation of Concerns <span class="tag">Architecture</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Routes (Controllers):</strong> Handle HTTP protocol, status codes, and model bindings.</li>
+              <li><strong>Pydantic Models:</strong> Handle input parsing, sanitization, and response filtering.</li>
+              <li><strong>Services:</strong> Contain domain business logic and database persistence.</li>
+            </ul>
+            <div class="callout">
+              <strong>Golden Rule:</strong> Keep routes thin! Never place heavy database queries or calculations directly inside route functions.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">09 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Async Route Handlers -->
+    <div class="slide" data-slide="10">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Async Routes</div>
+        <h2 class="slide-title">Use <code>async def</code> for I/O operations; use <code>def</code> for synchronous CPU work</h2>
+        <p class="slide-subtitle">How FastAPI handles concurrency under the hood between the async event loop and thread pools</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Async Route with Async Client <span class="tag">Non-Blocking</span></div>
+            <pre class="code-box"><code><span class="kw">import</span> httpx
+
+<span class="dec">@app.get</span>(<span class="str">"/github/{username}"</span>)
+<span class="kw">async def</span> <span class="fn">get_github_profile</span>(username: <span class="type">str</span>):
+    <span class="cm"># Uses non-blocking HTTPX async client</span>
+    <span class="kw">async with</span> httpx.<span class="type">AsyncClient</span>() <span class="kw">as</span> client:
+        res = <span class="kw">await</span> client.<span class="fn">get</span>(<span class="str">f"https://api.github.com/users/<span class="op">{</span>username<span class="op">}</span>"</span>)
+        <span class="kw">if</span> res.status_code == <span class="num">404</span>:
+            <span class="kw">raise</span> <span class="type">HTTPException</span>(status_code=<span class="num">404</span>, detail=<span class="str">"User not found"</span>)
+        <span class="kw">return</span> res.<span class="fn">json</span>()</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">FastAPI's Dual Execution Strategy <span class="tag">Performance</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>When you use <code>async def</code>:</strong> FastAPI runs the function directly on the main async event loop. You must <code>await</code> any I/O calls!</li>
+              <li><strong>When you use <code>def</code> (standard sync):</strong> FastAPI automatically runs the function in an external <strong>worker thread pool</strong> so it won't block the event loop.</li>
+            </ul>
+            <div class="callout-alert">
+              <strong>Watchout:</strong> If you write <code>async def</code> but call a blocking synchronous library inside it (like <code>time.sleep</code> or standard SQLite), you will freeze the server!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">10 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Error Handling with HTTPException -->
+    <div class="slide" data-slide="11">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Cheatsheet • Error Handling</div>
+        <h2 class="slide-title"><code>HTTPException</code> returns clean, structured HTTP status codes to the client</h2>
+        <p class="slide-subtitle">Intercepting domain errors and translating them into standard HTTP 404, 400, 401, or 409 payloads</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Raising `HTTPException` <span class="tag">Error Flow</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> fastapi <span class="kw">import</span> HTTPException, status
+<span class="kw">from</span> app.models <span class="kw">import</span> TaskNotFoundError
+
+<span class="dec">@app.get</span>(<span class="str">"/tasks/{task_id}"</span>)
+<span class="kw">def</span> <span class="fn">get_single_task</span>(task_id: <span class="type">int</span>):
+    <span class="kw">try</span>:
+        <span class="kw">return</span> task_service.<span class="fn">get_task</span>(task_id)
+    <span class="kw">except</span> <span class="type">TaskNotFoundError</span>:
+        <span class="kw">raise</span> <span class="type">HTTPException</span>(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=<span class="str">f"Task with ID <span class="op">{</span>task_id<span class="op">}</span> was not found"</span>
+        )</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Structured Error JSON Output <span class="tag">Client Response</span></div>
+            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">FastAPI automatically formats the exception into a standard JSON payload:</p>
+            <pre class="code-box"><code><span class="cm">// HTTP 404 Not Found</span>
+{
+  <span class="str">"detail"</span>: <span class="str">"Task with ID 999 was not found"</span>
+}</code></pre>
+            <div class="callout">
+              <strong>Custom Details:</strong> You can pass dictionaries or lists to <code>detail=</code> (e.g. <code>detail={"error_code": "TASK_EXPIRED", "retry": False}</code>).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">11 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Architectural Structure -->
+    <div class="slide" data-slide="12">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Project Architecture</div>
+        <h2 class="slide-title">Layered architecture: separating routes, schemas, and service logic</h2>
+        <p class="slide-subtitle">A lightweight, maintainable multi-file project layout for real-world production APIs</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Project Layout <span class="tag">Directory Tree</span></div>
+            <div style="background:var(--bg-code); padding:12px; border-radius:6px; font-family:var(--font-mono); font-size:11.5px; line-height:1.6;">
+              app/<br>
+              ├── <span style="color:var(--accent-yellow);">main.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);"># FastAPI app &amp; route endpoints</span><br>
+              ├── <span style="color:var(--accent-cyan);">models.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);"># Pydantic request/response schemas</span><br>
+              ├── <span style="color:var(--accent-green);">services.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);"># Business logic &amp; data access</span><br>
+              └── <span style="color:var(--accent-purple);">data/tasks.json</span>&nbsp;&nbsp;<span style="color:var(--text-muted);"># Persistent storage</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Why This Structure Wins <span class="tag">Benefits</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Testable:</strong> Services can be tested independently of HTTP requests using <code>pytest</code>.</li>
+              <li><strong>Swappable Storage:</strong> Changing from JSON file storage to SQLite (Day 5) only changes <code>services.py</code>—route controllers remain untouched!</li>
+              <li><strong>Type Cohesion:</strong> Schemas defined in <code>models.py</code> serve as the single source of truth.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">12 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Gotcha 1 - Type Hints as Runtime Validators -->
+    <div class="slide" data-slide="13">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Critical Gotchas • Validation</div>
+        <h2 class="slide-title">Type hints in FastAPI are runtime validators, not just IDE decorations</h2>
+        <p class="slide-subtitle">Understanding why passing incorrect types triggers HTTP 422 Unprocessable Entity</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">The Auto-Coercion Behavior <span class="tag">Feature</span></div>
+            <pre class="code-box"><code><span class="dec">@app.get</span>(<span class="str">"/items/{item_id}"</span>)
+<span class="kw">def</span> <span class="fn">read_item</span>(item_id: <span class="type">int</span>):
+    <span class="kw">return</span> {<span class="str">"item_id"</span>: item_id}
+
+<span class="cm"># Request: GET /items/42</span>
+<span class="cm"># FastAPI automatically parses "42" string to int 42!</span></code></pre>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">The 422 Validation Rejection <span class="tag">Trap</span></div>
+            <pre class="code-box"><code><span class="cm"># Request: GET /items/abc</span>
+<span class="cm"># "abc" cannot be converted to integer</span>
+<span class="cm"># Response: HTTP 422 Unprocessable Entity</span>
+{
+  <span class="str">"detail"</span>: [{
+    <span class="str">"loc"</span>: [<span class="str">"path"</span>, <span class="str">"item_id"</span>],
+    <span class="str">"msg"</span>: <span class="str">"Input should be a valid integer"</span>,
+    <span class="str">"type"</span>: <span class="str">"int_parsing"</span>
+  }]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">13 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: Gotcha 2 - Async Route Pitfall -->
+    <div class="slide" data-slide="14">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Critical Gotchas • Performance</div>
+        <h2 class="slide-title">Don't mix blocking synchronous I/O inside <code>async def</code> routes</h2>
+        <p class="slide-subtitle">Why calling synchronous database or HTTP operations in async endpoints degrades concurrency</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">The Event Loop Blocker <span class="tag">Anti-Pattern</span></div>
+            <pre class="code-box"><code><span class="cm"># ❌ DANGEROUS: Declared async def, but calls blocking I/O</span>
+<span class="dec">@app.get</span>(<span class="str">"/report"</span>)
+<span class="kw">async def</span> <span class="fn">generate_report</span>():
+    <span class="cm"># Blocking sync call freezes the entire web server!</span>
+    time.sleep(<span class="num">3.0</span>)
+    <span class="kw">return</span> {<span class="str">"report"</span>: <span class="str">"ready"</span>}</code></pre>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">The Two Correct Options <span class="tag">Solutions</span></div>
+            <pre class="code-box"><code><span class="cm"># Option A: Use standard `def` (FastAPI uses thread pool)</span>
+<span class="dec">@app.get</span>(<span class="str">"/report"</span>)
+<span class="kw">def</span> <span class="fn">generate_report_sync</span>():
+    time.sleep(<span class="num">3.0</span>)  <span class="cm"># Safe in thread pool!</span>
+    <span class="kw">return</span> {<span class="str">"report"</span>: <span class="str">"ready"</span>}
+
+<span class="cm"># Option B: Use true non-blocking async</span>
+<span class="dec">@app.get</span>(<span class="str">"/report"</span>)
+<span class="kw">async def</span> <span class="fn">generate_report_async</span>():
+    <span class="kw">await</span> asyncio.sleep(<span class="num">3.0</span>)  <span class="cm"># Non-blocking</span>
+    <span class="kw">return</span> {<span class="str">"report"</span>: <span class="str">"ready"</span>}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">14 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: Gotcha 3 - Fat Routes Anti-Pattern -->
+    <div class="slide" data-slide="15">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Critical Gotchas • Code Design</div>
+        <h2 class="slide-title">Avoid placing database queries and business logic inside route functions</h2>
+        <p class="slide-subtitle">Routes should only handle HTTP concerns and delegate domain logic to services</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <div class="card-title">Fat Route Anti-Pattern <span class="tag">Poor Maintainability</span></div>
+            <pre class="code-box"><code><span class="dec">@app.post</span>(<span class="str">"/tasks"</span>)
+<span class="kw">def</span> <span class="fn">create_task</span>(task: <span class="type">TaskCreate</span>):
+    <span class="cm"># Direct file I/O, business validation, ID generation</span>
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"tasks.json"</span>, <span class="str">"r+"</span>) <span class="kw">as</span> f:
+        data = json.load(f)
+        new_id = max(d[<span class="str">"id"</span>] <span class="kw">for</span> d <span class="kw">in</span> data) + <span class="num">1</span>
+        data.append({<span class="str">"id"</span>: new_id, **task.model_dump()})
+        f.seek(<span class="num">0</span>)
+        json.dump(data, f)
+    <span class="kw">return</span> {<span class="str">"id"</span>: new_id}</code></pre>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">Thin Route Pattern <span class="tag">Clean Architecture</span></div>
+            <pre class="code-box"><code><span class="dec">@app.post</span>(<span class="str">"/tasks"</span>, status_code=status.HTTP_201_CREATED)
+<span class="kw">def</span> <span class="fn">create_task</span>(
+    task: <span class="type">TaskCreate</span>,
+    response_model=<span class="type">TaskResponse</span>
+):
+    <span class="cm"># Delegate to service layer</span>
+    <span class="kw">return</span> task_service.<span class="fn">create_task</span>(task)</code></pre>
+            <div class="callout">
+              <strong>Rule:</strong> Keep routes under 10 lines of code.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">15 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 16: Guided Challenge -->
+    <div class="slide" data-slide="16">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Hands-On Practice</div>
+        <h2 class="slide-title">Guided Challenge: Full CRUD Task Management API</h2>
+        <p class="slide-subtitle">Build a complete REST API with GET, POST, PUT, and DELETE endpoints backed by Pydantic schemas</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">API Specification <span class="tag">Endpoints</span></div>
+            <div style="background:var(--bg-code); padding:10px; border-radius:6px; font-family:var(--font-mono); font-size:11.5px; line-height:1.6;">
+              <span style="color:var(--accent-cyan);">GET&nbsp;&nbsp;&nbsp;&nbsp;/tasks</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);">(filter by ?priority=&amp;completed=)</span><br>
+              <span style="color:var(--accent-cyan);">GET&nbsp;&nbsp;&nbsp;&nbsp;/tasks/{id}</span>&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);">(returns 404 if not found)</span><br>
+              <span style="color:var(--accent-green);">POST&nbsp;&nbsp;&nbsp;/tasks</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);">(validates JSON body, returns 201)</span><br>
+              <span style="color:var(--accent-yellow);">PUT&nbsp;&nbsp;&nbsp;&nbsp;/tasks/{id}</span>&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);">(updates task status/title)</span><br>
+              <span style="color:var(--accent-rose);">DELETE&nbsp;/tasks/{id}</span>&nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted);">(deletes task, returns 204)</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Challenge Files <span class="tag">Structure</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>`app/models.py`:</strong> Pydantic models (<code>TaskCreate</code>, <code>TaskUpdate</code>, <code>TaskResponse</code>).</li>
+              <li><strong>`app/services.py`:</strong> Service layer managing task repository state.</li>
+              <li><strong>`app/main.py`:</strong> FastAPI router with full endpoint suite.</li>
+            </ul>
+            <div class="callout">
+              <strong>Interactive:</strong> Test live endpoints via <code>http://localhost:8000/docs</code>!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">16 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 17: Interactive Testing via Swagger -->
+    <div class="slide" data-slide="17">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Developer Experience</div>
+        <h2 class="slide-title">Interactive API exploration at <code>/docs</code> with Swagger UI</h2>
+        <p class="slide-subtitle">Execute API requests, view schema models, and inspect validation errors without third-party tools</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Interactive Swagger Capabilities <span class="tag">Docs</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Try It Out:</strong> Execute live POST and GET requests directly in the browser.</li>
+              <li><strong>Schema Explorer:</strong> Inspect exact JSON body requirements, types, and constraints.</li>
+              <li><strong>Error Simulation:</strong> Send invalid payloads to visualize HTTP 422 validation responses.</li>
+            </ul>
+            <div class="callout">
+              <strong>OpenAPI Schema:</strong> Full JSON spec available at <code>/openapi.json</code> for frontend client generation (e.g. <code>openapi-typescript</code>).
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Programmatic Testing with HTTPX <span class="tag">Automated Test</span></div>
+            <pre class="code-box"><code><span class="kw">from</span> fastapi.testclient <span class="kw">import</span> TestClient
+<span class="kw">from</span> app.main <span class="kw">import</span> app
+
+client = <span class="type">TestClient</span>(app)
+
+<span class="kw">def</span> <span class="fn">test_create_task</span>():
+    res = client.<span class="fn">post</span>(
+        <span class="str">"/tasks"</span>,
+        json={<span class="str">"title"</span>: <span class="str">"Test task"</span>, <span class="str">"priority"</span>: <span class="str">"High"</span>}
+    )
+    <span class="kw">assert</span> res.status_code == <span class="num">201</span>
+    <span class="kw">assert</span> res.json()[<span class="str">"title"</span>] == <span class="str">"Test task"</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">17 / 18</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 18: Summary & Bridge to Day 5 -->
+    <div class="slide" data-slide="18">
+      <div class="slide-header">
+        <div class="slide-eyebrow">Summary &amp; Next Step</div>
+        <h2 class="slide-title">You can now build production REST APIs with validation and auto-docs</h2>
+        <p class="slide-subtitle">Connecting our FastAPI service to SQLite persistence and automated testing on Day 5</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">What We Mastered Today <span class="tag">Day 4 Review</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>FastAPI Routing:</strong> Declaring endpoints, path params, query params, and status codes.</li>
+              <li><strong>Pydantic v2:</strong> Defining <code>BaseModel</code> schemas, <code>Field</code> constraints, and response models.</li>
+              <li><strong>Lifecycle &amp; Errors:</strong> Translating domain exceptions to <code>HTTPException</code>.</li>
+              <li><strong>Architecture:</strong> Building a clean 3-layer decoupled API codebase.</li>
+            </ul>
+          </div>
+
+          <div class="card highlight">
+            <div class="card-title">Coming Up in Day 5: SQLite &amp; Complete App <span class="tag">Tomorrow</span></div>
+            <ul class="feature-list" style="margin-bottom:10px;">
+              <li><strong>Relational DBs &amp; SQLite:</strong> Connecting Python to SQLite with parameterized queries (SQL injection safety).</li>
+              <li><strong>CRUD Database Layer:</strong> Tables, primary keys, and data persistence.</li>
+              <li><strong>FastAPI + SQLite Integration:</strong> Wiring HTTP request flow to real persistent tables.</li>
+              <li><strong>Testing &amp; Capstone:</strong> Unit testing with <code>pytest</code> and launching the final capstone!</li>
+            </ul>
+            <div class="callout">
+              <strong>Progress:</strong> Completing the full stack from frontend client to persistent SQL database!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+          <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+        </div>
+        <div class="footer-right">18 / 18</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Controls -->
+  <div id="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()" title="Previous (Left Arrow / PageUp)">← Prev</button>
+    <button class="nav-btn" onclick="nextSlide()" title="Next (Right Arrow / Space / PageDown)">Next →</button>
+    <button class="nav-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen (F)">⛶ Fullscreen</button>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progress-bar');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+      const progressPercent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(`Error enabling fullscreen: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        currentSlide = 1;
+        updateSlide();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        currentSlide = totalSlides;
+        updateSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    function handleResize() {
+      const container = document.getElementById('deck-container');
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const scaleX = windowWidth / 1280;
+      const scaleY = windowHeight / 720;
+      const scale = Math.min(scaleX, scaleY) * 0.96;
+      container.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    updateSlide();
+  </script>
+</body>
+</html>
