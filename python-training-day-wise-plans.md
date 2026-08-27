@@ -5,6 +5,7 @@
 Master plan for **Learn Python in 5 Days**, a five-day, one-hour-per-day training program for experienced JavaScript/TypeScript web and hybrid-mobile developers.
 
 For each day, this plan will later be used to create:
+
 1. Professional-grade slides, preferably HTML or presentation-ready assets.
 2. A Jupyter Notebook (`.ipynb`) with explanations, examples, exercises, and runnable code.
 3. Optionally, a standalone Markdown chapter for the book **Learn Python in 5 Days**.
@@ -18,6 +19,7 @@ The live training is intentionally lean. The objective is not to cover Python co
 The trainees are experienced frontend/web developers, predominantly JavaScript/TypeScript developers.
 
 Assume they already understand:
+
 - Variables, functions, and control flow
 - Objects and arrays
 - OOP fundamentals
@@ -34,6 +36,7 @@ Use JavaScript/TypeScript comparisons whenever they accelerate understanding.
 # 3. Overall Course Goal
 
 By the end of the five days, trainees should be able to:
+
 - Read and write basic Python confidently.
 - Understand common Python idioms.
 - Work with Python collections and functions.
@@ -106,6 +109,7 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 ## Topics
 
 ### Python mental model
+
 - What Python is.
 - Where Python is commonly used.
 - Python vs JavaScript/TypeScript.
@@ -114,6 +118,7 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 - Basic `uv` workflow.
 
 ### Variables and basic types
+
 - Strings
 - Integers
 - Floats
@@ -123,6 +128,7 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 - Basic type hints
 
 ### Core collections
+
 - Lists
 - Dictionaries
 - Tuples
@@ -131,6 +137,7 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 - Mutation
 
 ### Control flow
+
 - `if / elif / else`
 - `for`
 - `while`
@@ -138,6 +145,7 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 - `continue`
 
 ### Functions
+
 - Defining functions
 - Parameters
 - Return values
@@ -147,6 +155,7 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 - f-strings
 
 ### Pythonic basics
+
 - List comprehensions
 - Dictionary comprehensions
 - Unpacking
@@ -155,7 +164,9 @@ Give experienced JavaScript/TypeScript developers enough Python language knowled
 - `range`
 
 ## Key gotchas
+
 Introduce only those naturally associated with the day's topics:
+
 - `==` vs `is`
 - `None`
 - Truthiness
@@ -168,6 +179,7 @@ Introduce only those naturally associated with the day's topics:
 `01_python_fundamentals.ipynb`
 
 Include:
+
 - Short explanations
 - Small runnable examples
 - JavaScript comparisons
@@ -186,6 +198,7 @@ The target is approximately **14–18 content-rich slides**. The live session re
 Do **not** introduce concepts before their scheduled day merely because they make a slide more interesting.
 
 For Day 1:
+
 - Comprehensions are allowed because they are explicitly part of Day 1.
 - Strings must be taught explicitly; they are not merely examples used while teaching another topic.
 - Functions must include parameters, return values, default arguments, keyword arguments, and type hints.
@@ -201,6 +214,7 @@ For Day 1:
 A learner should be able to return to the slide after training and use it as a quick reference.
 
 Examples:
+
 - A **String** slide should be a String cheatsheet.
 - A **List** slide should be a List cheatsheet.
 - A **Dictionary** slide should be a Dictionary cheatsheet.
@@ -208,6 +222,7 @@ Examples:
 - A **Control Flow** slide should be a Control Flow cheatsheet.
 
 A cheatsheet slide should contain:
+
 - Core syntax.
 - Common operations.
 - Small examples.
@@ -245,6 +260,7 @@ Some slides can be combined during final production if the visual treatment beco
 The instructor should not read every cheatsheet item aloud.
 
 Use the deck as a reference surface:
+
 - Explain the core idea.
 - Demonstrate the most important examples in Jupyter.
 - Point learners to the remaining cheatsheet material for later reference.
@@ -253,6 +269,7 @@ Use the deck as a reference surface:
 ### Content-depth rule
 
 For every Day 1 topic, the final deck should answer:
+
 1. What is it?
 2. What does the basic syntax look like?
 3. What are the most common operations?
@@ -286,12 +303,14 @@ Move from isolated snippets to code that can form a small maintainable applicati
 ## Topics
 
 ### Modules and imports
+
 - Python modules
 - Standard-library imports
 - Local modules
 - Basic package structure
 
 ### Classes and objects
+
 - Classes
 - `__init__`
 - `self`
@@ -316,6 +335,7 @@ class Task:
 Explain why dataclasses are useful.
 
 ### Files and JSON
+
 - `pathlib`
 - Reading/writing files
 - JSON
@@ -323,6 +343,7 @@ Explain why dataclasses are useful.
 - Context managers
 
 ### Exceptions
+
 - `try`
 - `except`
 - `finally`
@@ -332,6 +353,7 @@ Explain why dataclasses are useful.
 - Why not to catch everything
 
 ### Useful function features
+
 - `*args`
 - `**kwargs`
 - Unpacking
@@ -351,6 +373,7 @@ means conceptually.
 Do not go into advanced decorator patterns.
 
 ## Key gotchas
+
 - Mutable default arguments.
 - Mutable class attributes.
 - `is` vs `==` where relevant.
@@ -363,6 +386,7 @@ Do not go into advanced decorator patterns.
 `02_practical_python.ipynb`
 
 Include:
+
 - Classes
 - Dataclasses
 - File/JSON example
@@ -373,6 +397,7 @@ Include:
 ## Slides
 
 Suggested story:
+
 1. **Python becomes useful when code becomes reusable**
 2. Modules turn scripts into applications
 3. Classes and dataclasses
@@ -407,6 +432,7 @@ Teach the subset of Python that makes it particularly useful for web integration
 ## Topics
 
 ### HTTP APIs
+
 - HTTP basics in Python
 - HTTPX
 - GET/POST
@@ -417,6 +443,7 @@ Teach the subset of Python that makes it particularly useful for web integration
 - Basic timeouts/error handling
 
 ### Async Python
+
 - `async def`
 - `await`
 - Coroutine concept
@@ -427,6 +454,7 @@ Teach the subset of Python that makes it particularly useful for web integration
 Use JavaScript promises/async-await as the comparison point.
 
 ### Iterables and generators
+
 - Iterable concept
 - Iterator concept
 - `yield`
@@ -435,6 +463,7 @@ Use JavaScript promises/async-await as the comparison point.
 Keep this practical and brief.
 
 ### Web scraping introduction
+
 - HTML as input data
 - BeautifulSoup
 - Extracting simple information
@@ -443,6 +472,7 @@ Keep this practical and brief.
 Do not turn the course into a scraping course.
 
 ### `uv` workflow
+
 - Adding dependencies
 - Running commands
 - Project environment
@@ -458,6 +488,7 @@ uv run python ...
 ```
 
 ## Key gotchas
+
 - Forgetting `await`.
 - `async def` does not execute immediately.
 - Async does not automatically make CPU-heavy work faster.
@@ -472,6 +503,7 @@ uv run python ...
 `03_web_and_async.ipynb`
 
 Include:
+
 - Calling a public HTTP API.
 - Inspecting JSON.
 - Async request example.
@@ -482,6 +514,7 @@ Include:
 ## Slides
 
 Suggested story:
+
 1. **Python becomes powerful when it starts talking to the outside world**
 2. Calling APIs with HTTPX
 3. From JavaScript promises to Python coroutines
@@ -507,6 +540,7 @@ Give frontend developers enough knowledge to build a Python backend that their e
 ## Important teaching decision
 
 Use Jupyter for:
+
 - Explaining
 - Experimenting
 - Inspecting Pydantic behavior
@@ -528,6 +562,7 @@ day-04/
 ## Topics
 
 ### FastAPI fundamentals
+
 - What FastAPI is
 - Application object
 - Routes
@@ -536,11 +571,13 @@ day-04/
 - Automatic API documentation
 
 ### Request parameters
+
 - Path parameters
 - Query parameters
 - Request bodies
 
 ### Pydantic
+
 - `BaseModel`
 - Request models
 - Response models
@@ -549,11 +586,13 @@ day-04/
 - Relationship between type hints and runtime validation
 
 ### Async endpoints
+
 - `async def`
 - Using async service calls
 - Avoiding blocking work in async endpoints
 
 ### Error handling
+
 - HTTP status codes
 - `HTTPException`
 - Basic application error handling
@@ -573,6 +612,7 @@ app/
 Do not over-engineer the project structure.
 
 ## Key gotchas
+
 - Decorators register FastAPI routes.
 - Type hints are not the same as runtime validation.
 - `async` does not make blocking code non-blocking.
@@ -586,6 +626,7 @@ Do not over-engineer the project structure.
 Use the notebook to explain and experiment.
 
 Include:
+
 - First FastAPI endpoint.
 - Parameters.
 - Pydantic request model.
@@ -597,6 +638,7 @@ Include:
 ## Slides
 
 Suggested story:
+
 1. **FastAPI gives Python developers a familiar web boundary**
 2. Request → route → service → response
 3. Building the first endpoint
@@ -632,6 +674,7 @@ Complete the transition from Python examples to a small end-to-end application w
 ## Topics
 
 ### Database fundamentals
+
 - What a relational database is.
 - Tables and rows.
 - Primary keys.
@@ -639,6 +682,7 @@ Complete the transition from Python examples to a small end-to-end application w
 - SQLite and why it is useful for small applications.
 
 ### Python + SQLite
+
 - Connecting to SQLite.
 - Creating a table.
 - Insert.
@@ -686,6 +730,7 @@ Do not introduce a large ORM framework unless there is significant spare time.
 Introduce the idea of automated testing with pytest.
 
 Primary focus:
+
 - Unit test concept.
 - A simple Python function test.
 - One basic API test if time permits.
@@ -697,6 +742,7 @@ Do not teach a complete testing framework.
 Show the complete application from frontend/API client to database.
 
 ## Key gotchas
+
 - SQL injection and parameterized queries.
 - Database connections/resources need proper handling.
 - SQLite is excellent for small applications but not a universal production database.
@@ -709,6 +755,7 @@ Show the complete application from frontend/API client to database.
 `05_sqlite_and_capstone.ipynb`
 
 Include:
+
 - Basic SQL examples.
 - Python SQLite example.
 - CRUD example.
@@ -719,6 +766,7 @@ Include:
 ## Slides
 
 Suggested story:
+
 1. **A useful application needs somewhere to remember things**
 2. SQLite in one picture
 3. Tables, rows, and simple SQL
@@ -746,6 +794,7 @@ The question should be:
 > **What useful thing can I build now using Python together with the skills I already have?**
 
 A capstone may therefore be:
+
 - Full-stack web application.
 - Data-oriented application.
 - Automation tool.
@@ -759,20 +808,25 @@ A capstone may therefore be:
 ## Suggested capstone choices
 
 ### 1. Expense Tracker
+
 Frontend:
+
 - Dashboard
 - Charts
 - Filters
 - Expense entry
 
 Python:
+
 - FastAPI
 - Pydantic
 - SQLite
 - Aggregation
 
 ### 2. Bookmark Manager
+
 Features:
+
 - Save URLs.
 - Tags.
 - Search.
@@ -789,7 +843,9 @@ SQLite
 ```
 
 ### 3. GitHub Dashboard
+
 Features:
+
 - Repository search.
 - Stars.
 - Issues.
@@ -799,7 +855,9 @@ Features:
 Python consumes the GitHub API and can optionally cache results.
 
 ### 4. JSON/CSV Data Explorer
+
 Frontend:
+
 - Upload file.
 - Table view.
 - Filtering.
@@ -807,13 +865,16 @@ Frontend:
 - Charts.
 
 Python:
+
 - Parse data.
 - Validate data.
 - Transform data.
 - Aggregate results.
 
 ### 5. Website Monitor
+
 Features:
+
 - Track URLs.
 - Check availability.
 - Record response times.
@@ -822,7 +883,9 @@ Features:
 Python handles periodic checking and persistence.
 
 ### 6. Price Tracker
+
 Features:
+
 - Track selected URLs.
 - Extract a price.
 - Store history.
@@ -831,13 +894,16 @@ Features:
 Python demonstrates automation and web parsing.
 
 ### 7. News Aggregator
+
 Python:
+
 - Consume RSS/API sources.
 - Normalize articles.
 - Deduplicate.
 - Store data.
 
 Frontend:
+
 - Search.
 - Categories.
 - Bookmarks.
@@ -874,6 +940,7 @@ To keep projects comparable and achievable:
 ## Minimum requirements
 
 Every capstone should have:
+
 - Python.
 - `uv`.
 - A meaningful Python component.
@@ -913,6 +980,7 @@ The uploaded **EY Executive Presentation Visual Guide** is the source of truth f
 - Consulting quality
 
 Avoid:
+
 - Busy layouts
 - Academic lecture-slide appearance
 - Startup-pitch aesthetics
@@ -922,6 +990,7 @@ Avoid:
 ## Color direction
 
 Use the visual guide's restrained palette:
+
 - Very dark charcoal / near-black background.
 - White primary text.
 - EY Yellow as a restrained accent.
@@ -933,6 +1002,7 @@ Yellow should guide attention, not dominate.
 ## Typography
 
 Headlines should be:
+
 - Large.
 - Bold.
 - Short.
@@ -943,6 +1013,7 @@ Body copy should remain concise.
 ## Layout
 
 Prefer:
+
 - One dominant focal point.
 - Strong hierarchy.
 - Generous whitespace.
@@ -982,6 +1053,7 @@ Avoid multiple competing visuals.
 Prefer original conceptual diagrams rather than decorative graphics.
 
 Useful diagrams for this course:
+
 - Python ↔ JavaScript mental-model maps.
 - Data structure maps.
 - Notebook → project progression.
@@ -1000,18 +1072,21 @@ Do not use generic SmartArt.
 Code should explain the idea behind the code, not reproduce an entire notebook.
 
 When code is necessary:
+
 - Show only relevant lines.
 - Use large readable typography.
 - Annotate the important concept.
 - Avoid full-screen source files.
 
-## Instructor footer
+## footer
 
 **Every slide must include:**
 
 > `Instructor: Suman Barick`
+> `L&D POC: Rahul Bajaj / Aman Singh Kamboj`
 
 The footer should be:
+
 - Small but clearly visible.
 - Consistent in position.
 - Visually subordinate to the main content.
@@ -1023,7 +1098,14 @@ Every slide should be understandable without the instructor speaking.
 
 Because the deck doubles as learning material, a learner should be able to revisit a slide weeks later and still use it.
 
+A deck for a day must deeply cover all the topics of that day. It may reference topics from past. But it should never contain topics are are yet to be disucssed of a future day.
+
+Let each slide be a (as much as possible) complete reference / cheatsheet of all the common usages of 1 particular topic, e.g. if a slide is on string, it should have everything on python strings, methods, usages, indexing etc.
+
+There is no upper limit on how many slides a day can have.
+
 For topic/cheatsheet slides, include enough information to:
+
 - Identify the concept.
 - Recall the syntax.
 - See common usage.
@@ -1056,6 +1138,7 @@ The exact layout should vary by topic; this is a content model, not a mandatory 
 ## Slide quality test
 
 Before finalizing each slide, ask:
+
 1. Does the headline communicate a useful takeaway?
 2. Is there one dominant idea?
 3. Can the slide be understood quickly?
@@ -1195,6 +1278,7 @@ If a standalone Markdown chapter is created for a day, it should be written as a
 # Learn Python in 5 Days
 
 Tone:
+
 - Friendly.
 - Professional.
 - Respectful.
@@ -1204,6 +1288,7 @@ Tone:
 - Practical rather than academic.
 
 The chapter should include:
+
 - Conceptual explanations.
 - A good amount of examples.
 - JavaScript comparisons.
@@ -1220,6 +1305,7 @@ The chapter should be useful to someone who did not attend the live session.
 # 17. Scope Guardrails
 
 The following topics are intentionally outside the core five-day curriculum:
+
 - Advanced decorators.
 - Metaclasses.
 - Descriptors.
