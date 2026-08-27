@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Reader — Learn Python in 5 Days</title>
+  
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0d0e11;
+      --bg-surface: #14161b;
+      --bg-card: #181a20;
+      --bg-code: #0b0c0e;
+      --border-color: #2a2e38;
+      --border-subtle: #1e2128;
+      --text-primary: #f3f4f6;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent-yellow: #ffe600;
+      --accent-yellow-dim: rgba(255, 230, 0, 0.1);
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-rose: #fb7185;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Fira Code", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Reading Progress Bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent-yellow);
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Top Navigation Bar */
+    header.reader-nav {
+      position: sticky;
+      top: 0;
+      background: rgba(13, 14, 17, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 900;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-back:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
+    .doc-title-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .doc-title-badge::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-yellow);
+      border-radius: 2px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chapter-select {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .chapter-select:focus {
+      border-color: var(--accent-yellow);
+    }
+
+    /* Main Reader Container */
+    .reader-layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 32px 80px 32px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 48px;
+      align-items: flex-start;
+    }
+
+    /* Sticky Sidebar Table of Contents */
+    aside.toc-sidebar {
+      position: sticky;
+      top: 90px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .toc-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      margin-bottom: 12px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toc-list li {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .toc-list li.toc-h3 {
+      padding-left: 12px;
+    }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .toc-list a:hover {
+      color: var(--accent-yellow);
+    }
+
+    /* Markdown Content Styling */
+    main.markdown-body {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 44px 52px;
+      min-width: 0; /* Prevents overflow */
+    }
+
+    .markdown-body h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+      margin-bottom: 24px;
+      line-height: 1.25;
+    }
+
+    .markdown-body h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 36px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+      letter-spacing: -0.4px;
+    }
+
+    .markdown-body h3 {
+      font-size: 16.5px;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+
+    .markdown-body p {
+      font-size: 14.5px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.68;
+    }
+
+    .markdown-body ul, .markdown-body ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: var(--text-secondary);
+    }
+
+    .markdown-body li {
+      font-size: 14px;
+      margin-bottom: 6px;
+      line-height: 1.55;
+    }
+
+    .markdown-body strong {
+      color: #ffffff;
+    }
+
+    .markdown-body hr {
+      border: 0;
+      height: 1px;
+      background: var(--border-color);
+      margin: 32px 0;
+    }
+
+    /* Tables */
+    .markdown-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 13px;
+      background: var(--bg-card);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .markdown-body th {
+      background: #101216;
+      color: var(--accent-yellow);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .markdown-body td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .markdown-body tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Inline Code and Code Blocks */
+    .markdown-body code:not(pre code) {
+      background: var(--bg-code);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .markdown-body pre {
+      background: var(--bg-code) !important;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 18px 0;
+      overflow-x: auto;
+    }
+
+    .markdown-body pre code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.55;
+      background: transparent !important;
+      padding: 0;
+    }
+
+    /* GitHub-style Alerts / Blockquotes */
+    .markdown-body blockquote {
+      margin: 20px 0;
+      padding: 12px 18px;
+      border-radius: 0 6px 6px 0;
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent-yellow);
+      color: var(--text-secondary);
+      font-size: 13.5px;
+    }
+
+    .alert-note {
+      border-left-color: var(--accent-cyan) !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+    }
+    .alert-note strong.alert-title { color: var(--accent-cyan); }
+
+    .alert-tip {
+      border-left-color: var(--accent-green) !important;
+      background: rgba(74, 222, 128, 0.08) !important;
+    }
+    .alert-tip strong.alert-title { color: var(--accent-green); }
+
+    .alert-important {
+      border-left-color: var(--accent-purple) !important;
+      background: rgba(192, 132, 252, 0.08) !important;
+    }
+    .alert-important strong.alert-title { color: var(--accent-purple); }
+
+    .alert-warning, .alert-caution {
+      border-left-color: var(--accent-rose) !important;
+      background: rgba(251, 113, 133, 0.08) !important;
+    }
+    .alert-warning strong.alert-title, .alert-caution strong.alert-title { color: var(--accent-rose); }
+
+    /* Footer */
+    footer.site-footer {
+      max-width: 1280px;
+      margin: 40px auto 0 auto;
+      border-top: 1px solid var(--border-color);
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-left {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-item strong {
+      color: var(--text-primary);
+    }
+
+    .footer-right {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--accent-yellow);
+    }
+
+    /* Loading Spinner */
+    .loading-state {
+      padding: 60px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .reader-layout {
+        grid-template-columns: 1fr;
+      }
+      aside.toc-sidebar {
+        display: none; /* Hide TOC on mobile */
+      }
+      main.markdown-body {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+
+  <!-- Top Reader Navigation Bar -->
+  <header class="reader-nav">
+    <div class="nav-left">
+      <a href="index.html" class="btn-back">← Course Hub</a>
+      <div class="doc-title-badge" id="nav-doc-title">Python Training Chapter</div>
+    </div>
+    <div class="nav-right">
+      <a href="#" id="downloadMdBtn" class="btn-back" download="chapter.md" title="Download this markdown file" style="color:var(--accent-yellow); border-color:rgba(255,230,0,0.3);">
+        ⬇ Download .md
+      </a>
+      <label for="chapterSelect" style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Chapter:</label>
+      <select id="chapterSelect" class="chapter-select" onchange="switchChapter(this.value)">
+        <option value="day-01/01_python_fundamentals.md">Day 1: Python Foundations</option>
+        <option value="day-02/02_practical_python.md">Day 2: Practical Python</option>
+        <option value="day-03/03_web_and_async.md">Day 3: Web &amp; Async I/O</option>
+        <option value="day-04/04_fastapi_pydantic.md">Day 4: FastAPI + Pydantic</option>
+        <option value="day-05/05_sqlite_and_capstone.md">Day 5: SQLite &amp; Capstone</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Reader Body Layout -->
+  <div class="reader-layout">
+    
+    <!-- Table of Contents Sidebar -->
+    <aside class="toc-sidebar">
+      <div class="toc-title">Table of Contents</div>
+      <ul class="toc-list" id="tocList">
+        <li style="color:var(--text-muted);">Loading document...</li>
+      </ul>
+    </aside>
+
+    <!-- Main Rendered Markdown Area -->
+    <main class="markdown-body" id="contentArea">
+      <div class="loading-state">Loading chapter content...</div>
+    </main>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-left">
+      <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+      <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+    </div>
+    <div class="footer-right">Learn Python in 5 Days • Reader</div>
+  </footer>
+
+  <script>
+    // Configure Marked with Highlight.js
+    marked.setOptions({
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            return hljs.highlight(code, { language: lang }).value;
+          } catch (e) {}
+        }
+        return hljs.highlightAuto(code).value;
+      },
+      breaks: false,
+      gfm: true
+    });
+
+    // Custom Alert Parser for GitHub-style Blockquotes (> [!NOTE], > [!TIP], etc.)
+    function formatAlerts(html) {
+      return html
+        .replace(/<blockquote>\s*<p>\s*\[!NOTE\]\s*<br>/gi, '<blockquote class="alert-note"><p><strong class="alert-title">NOTE:</strong><br>')
+        .replace(/<blockquote>\s*<p>\s*\[!TIP\]\s*<br>/gi, '<blockquote class="alert-tip"><p><strong class="alert-title">TIP:</strong><br>')
+        .replace(/<blockquote>\s*<p>\s*\[!IMPORTANT\]\s*<br>/gi, '<blockquote class="alert-important"><p><strong class="alert-title">IMPORTANT:</strong><br>')
+        .replace(/<blockquote>\s*<p>\s*\[!WARNING\]\s*<br>/gi, '<blockquote class="alert-warning"><p><strong class="alert-title">WARNING:</strong><br>')
+        .replace(/<blockquote>\s*<p>\s*\[!CAUTION\]\s*<br>/gi, '<blockquote class="alert-caution"><p><strong class="alert-title">CAUTION:</strong><br>');
+    }
+
+    // Build Table of Contents
+    function generateTOC() {
+      const content = document.getElementById('contentArea');
+      const headings = content.querySelectorAll('h2, h3');
+      const tocList = document.getElementById('tocList');
+      tocList.innerHTML = '';
+
+      if (headings.length === 0) {
+        tocList.innerHTML = '<li style="color:var(--text-muted);">No sections found.</li>';
+        return;
+      }
+
+      headings.forEach((heading, idx) => {
+        const id = `section-${idx}`;
+        heading.id = id;
+
+        const li = document.createElement('li');
+        if (heading.tagName === 'H3') {
+          li.classList.add('toc-h3');
+        }
+
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.textContent = heading.textContent.replace(/^#+\s*/, '');
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          heading.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    }
+
+    // Load Markdown File
+    async function loadMarkdown(filePath) {
+      const contentArea = document.getElementById('contentArea');
+      const navTitle = document.getElementById('nav-doc-title');
+      const chapterSelect = document.getElementById('chapterSelect');
+      const downloadMdBtn = document.getElementById('downloadMdBtn');
+
+      contentArea.innerHTML = '<div class="loading-state">Loading chapter content...</div>';
+      chapterSelect.value = filePath;
+      
+      // Configure download button
+      downloadMdBtn.href = filePath;
+      downloadMdBtn.download = filePath.split('/').pop();
+
+      try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+          throw new Error(`Failed to load ${filePath} (HTTP ${response.status})`);
+        }
+        const rawMarkdown = await response.text();
+        
+        // Parse title from first # header if available
+        const titleMatch = rawMarkdown.match(/^#\s+(.+)$/m);
+        if (titleMatch) {
+          navTitle.textContent = titleMatch[1];
+          document.title = `${titleMatch[1]} — Learn Python in 5 Days`;
+        }
+
+        // Render HTML
+        let parsedHtml = marked.parse(rawMarkdown);
+        parsedHtml = formatAlerts(parsedHtml);
+        contentArea.innerHTML = parsedHtml;
+
+        // Apply syntax highlight
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el);
+        });
+
+        // Generate Sidebar TOC
+        generateTOC();
+
+        // Scroll back to top
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+      } catch (err) {
+        contentArea.innerHTML = `
+          <div style="padding: 40px; text-align: center;">
+            <h2 style="color:var(--accent-rose); margin-bottom:12px;">Failed to Load Markdown File</h2>
+            <p style="color:var(--text-secondary); margin-bottom: 20px;">Could not fetch <code>${filePath}</code>.</p>
+            <p style="font-size:12.5px; color:var(--text-muted);">
+              If you opened this directly from a local browser using <code>file://</code>, browser security policies may restrict local fetching.
+              Launch a local server using: <code>uv run python -m http.server 8080</code> and open <code>http://localhost:8080</code>.
+            </p>
+          </div>
+        `;
+      }
+    }
+
+    function switchChapter(filePath) {
+      window.history.pushState({}, '', `?file=${encodeURIComponent(filePath)}`);
+      loadMarkdown(filePath);
+    }
+
+    // Reading Scroll Progress Indicator
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+    });
+
+    // Initialize from URL query parameter
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetFile = urlParams.get('file') || 'day-01/01_python_fundamentals.md';
+      loadMarkdown(targetFile);
+    });
+
+    window.addEventListener('popstate', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetFile = urlParams.get('file') || 'day-01/01_python_fundamentals.md';
+      loadMarkdown(targetFile);
+    });
+  </script>
+</body>
+</html>
