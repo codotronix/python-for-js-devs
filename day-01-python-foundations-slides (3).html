@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learn Python in 5 Days — Day 1</title>
+<style>
+:root{
+  --bg:#1c1c1c;--panel:#272727;--panel2:#222;--text:#f6f6f6;
+  --muted:#b9b9b9;--line:#4a4a4a;--yellow:#ffe600;--code:#101010;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#0e0e0e;color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{overflow-x:hidden}
+.slide{
+  width:100vw;height:56.25vw;min-height:0;position:relative;overflow:hidden;
+  background:var(--bg);padding:3.0vw 5.2vw 3.3vw;
+  page-break-after:always;
+}
+.slide:after{content:"";position:absolute;left:5.5vw;right:5.5vw;bottom:2.05vw;height:1px;background:var(--line)}
+.footer{
+  position:absolute;left:5.2vw;bottom:.62vw;color:#a5a5a5;
+  font-size:.70vw;letter-spacing:.01em;display:flex;gap:1.8vw;align-items:center
+}
+.footer strong{color:#d8d8d8;font-weight:600}
+.num{position:absolute;right:5.2vw;bottom:.62vw;color:#8b8b8b;font-size:.70vw}
+.kicker{font-size:1.02vw;color:var(--yellow);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.75vw}
+h1{font-size:4.15vw;line-height:1.01;letter-spacing:-.04em;margin:0;max-width:90%}
+h2{font-size:2.9vw;line-height:1.04;letter-spacing:-.035em;margin:0;max-width:94%}
+h3{font-size:1.18vw;margin:0 0 .42vw}
+p{margin:.4vw 0;color:var(--muted);line-height:1.32;font-size:.96vw}
+.yellow{color:var(--yellow)}.muted{color:var(--muted)}
+.rule{height:4px;width:4.3vw;background:var(--yellow);margin:1.05vw 0}
+.grid{display:grid;gap:.85vw}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.four{grid-template-columns:repeat(4,1fr)}
+.panel{background:rgba(255,255,255,.028);border:1px solid var(--line);border-radius:7px;padding:1.0vw}
+.label{font-size:.70vw;letter-spacing:.1em;text-transform:uppercase;color:#aaa;font-weight:700;margin-bottom:.38vw}
+.big{font-size:1.55vw;font-weight:700;line-height:1.12}
+.small{font-size:.82vw;color:var(--muted);line-height:1.28}
+code,pre{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+pre{margin:0;background:var(--code);border:1px solid #393939;border-radius:6px;padding:1.0vw 1.05vw;font-size:1.02vw;line-height:1.42;white-space:pre-wrap}
+.callout{border-left:4px solid var(--yellow);background:rgba(255,230,0,.10);padding:.9vw 1.0vw;font-size:.76vw;line-height:1.32}
+.tag{display:inline-block;border:1px solid #555;border-radius:999px;padding:.25vw .48vw;color:#ccc;font-size:.72vw;margin:.1vw .1vw 0 0}
+.hero{height:100%;display:flex;flex-direction:column;justify-content:center;padding-bottom:1.2vw}
+.hero .sub{max-width:67%;font-size:1.22vw;color:var(--muted);line-height:1.38}
+.bridge{margin-top:1.55vw;display:grid;grid-template-columns:1fr .18fr 1fr;gap:.8vw;align-items:center}
+.bridgebox{border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:8px;padding:1.0vw;min-height:6.9vw}
+.bridgebox strong{display:block;font-size:1.48vw;margin-bottom:.3vw}.arrow{color:var(--yellow);font-size:2.5vw;text-align:center}
+.mapping{margin-top:1.25vw;border-top:1px solid var(--line)}
+.maprow{display:grid;grid-template-columns:1fr .12fr 1fr;gap:.6vw;padding:.42vw 0;border-bottom:1px solid #383838;font-size:.77vw;align-items:center}.maprow .a{text-align:center;color:var(--yellow)}
+.types{margin-top:.85vw;display:grid;grid-template-columns:repeat(5,1fr);gap:.6vw}
+.type{border-top:3px solid var(--yellow);padding:.62vw;background:rgba(255,255,255,.025);min-height:5.8vw}
+.type strong{display:block;font-size:1.02vw;margin-bottom:.18vw}.type code{color:var(--yellow);font-size:.79vw}
+.string-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:.85vw;margin-top:1.45vw}
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:.42vw}
+.method{border:1px solid var(--line);border-radius:5px;padding:.43vw .55vw;background:rgba(255,255,255,.02)}
+.method code{color:#fff;font-size:.73vw}.method span{display:block;color:#aaa;font-size:.66vw;margin-top:.12vw}
+.collection-wrap{margin-top:1.45vw;display:grid;grid-template-columns:repeat(4,1fr);gap:.65vw}
+.collection-card{min-height:8.7vw;display:flex;flex-direction:column;justify-content:space-between}
+.collection-card .name{font-size:1.22vw;font-weight:700}.collection-card .shape{font-size:.96vw;color:var(--yellow);margin-top:.25vw}.collection-card .desc{font-size:.76vw;color:var(--muted);line-height:1.25}
+.ops{display:grid;grid-template-columns:1fr 1fr;gap:.42vw}
+.op{padding:.43vw .55vw;border:1px solid #404040;border-radius:5px;background:rgba(255,255,255,.018)}
+.op code{font-size:.72vw;color:#eee}.op span{display:block;color:#999;font-size:.64vw;margin-top:.12vw}
+.slice{margin-top:1.45vw;display:grid;grid-template-columns:.9fr 1.1fr;gap:.85vw;align-items:stretch}
+.visual-index{padding:.9vw;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.025)}
+.indexline{display:flex;gap:.18vw;margin:.55vw 0}.indexline span{flex:1;border:1px solid #555;padding:.5vw .25vw;text-align:center;font-family:monospace;font-size:.76vw}.indexline .idx{color:#999;border:none}
+.function-anatomy{margin-top:1.35vw;display:grid;grid-template-columns:1.7fr .16fr 1fr .16fr .8fr;gap:.35vw;align-items:stretch}
+.fbox{border:1px solid var(--line);border-radius:6px;background:var(--code);padding:.68vw}.fbox strong{display:block;color:var(--yellow);font-size:.70vw;margin-bottom:.25vw}.fbox code{font-size:.78vw}.connector{text-align:center;color:#777;align-self:center}
+.param-grid{margin-top:.72vw;display:grid;grid-template-columns:repeat(3,1fr);gap:.6vw}
+.param{border:1px solid var(--line);padding:.65vw;border-radius:6px}.param code{color:var(--yellow);font-size:.78vw}.param strong{display:block;margin:.25vw 0;font-size:1.02vw}.param span{font-size:.68vw;color:#aaa;line-height:1.25}
+.idiom-grid{margin-top:1.35vw;display:grid;grid-template-columns:repeat(4,1fr);gap:.6vw}
+.idiom{min-height:5.7vw}.idiom code{font-size:.9vw;color:var(--yellow)}.idiom strong{display:block;font-size:.68vw;margin:.3vw 0 .15vw}.idiom span{font-size:.68vw;color:#aaa;line-height:1.25}
+.gotcha-grid{margin-top:1.35vw;display:grid;grid-template-columns:repeat(3,1fr);gap:.7vw}
+.gotcha{border-top:3px solid var(--yellow);padding:.68vw;background:rgba(255,255,255,.025);min-height:8.3vw}
+.gotcha h3{font-size:1.02vw}.gotcha pre{font-size:.56vw;margin:.4vw 0}.gotcha p{font-size:.68vw;margin:0}
+.challenge{margin-top:1.35vw;display:grid;grid-template-columns:1.12fr .88fr;gap:.85vw}
+.recap{margin-top:1.35vw;display:grid;grid-template-columns:.78fr 1.22fr;gap:.9vw}
+.flowlist{display:flex;flex-direction:column;gap:.3vw}.flowitem{padding:.43vw .62vw;border-left:3px solid var(--yellow);background:rgba(255,255,255,.025);font-size:1.02vw}
+.remember{display:grid;grid-template-columns:1fr 1fr;gap:.55vw}.remember .panel{min-height:4.15vw}.remember strong{display:block;font-size:.68vw}.remember span{display:block;color:#aaa;font-size:.70vw;margin-top:.18vw;line-height:1.2}
+@media print{body{background:#fff}.slide{width:100%;height:100vh;min-height:auto}}
+
+<style>
+.slide:not(:first-child) > .kicker{padding-top:.05vw}
+.slide:not(:first-child) > .footer,
+.slide:not(:first-child) > .num{z-index:10}
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <div class="hero">
+    <div class="kicker">Learn Python in 5 Days · Day 1</div>
+    <h1>Python is familiar —<br><span class="yellow">but deliberately different.</span></h1>
+    <div class="rule"></div>
+    <div class="hero sub">You already know how to program. Today is about learning Python's way of expressing the ideas you already know.</div>
+    <div class="bridge">
+      <div class="bridgebox"><strong>JavaScript / TypeScript</strong><span class="muted">Your existing engineering toolkit</span></div>
+      <div class="arrow">→</div>
+      <div class="bridgebox"><strong>Python</strong><span class="muted">New syntax + new idioms</span><div style="margin-top:.55vw"><span class="tag">Web</span><span class="tag">APIs</span><span class="tag">Automation</span><span class="tag">Data</span><span class="tag">AI</span></div></div>
+    </div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">01</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Mental model</div>
+  <h2>Most programming concepts transfer;<br><span class="yellow">the syntax and idioms change.</span></h2>
+  <div class="mapping">
+    <div class="maprow"><code>const name = "Suman"</code><div class="a">→</div><code>name = "Suman"</code></div>
+    <div class="maprow"><code>null</code><div class="a">→</div><code>None</code></div>
+    <div class="maprow"><code>===</code><div class="a">→</div><code>==</code></div>
+    <div class="maprow"><code>async / await</code><div class="a">→</div><code>async / await</code></div>
+    <div class="maprow"><code>array.map(...)</code><div class="a">→</div><code>[... for ... in ...]</code></div>
+  </div>
+  <div class="grid two" style="margin-top:1.35vw;align-items:start">
+    <pre>name = "Suman"
+language = "Python"
+
+print(f"{name} is learning {language}")</pre>
+    <div class="panel"><div class="label">Key idea</div><div class="big">Learn the differences that matter.</div><p>Use your JavaScript knowledge as a bridge, not as a template that Python must imitate.</p></div>
+  </div>
+  <div class="callout" style="margin-top:.85vw">Python's biggest early shift is often not syntax — it is learning the language's preferred idioms and object model.</div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">02</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Variables & basic types</div>
+  <h2>Python names values directly; <span class="yellow">the value carries its type.</span></h2>
+  <div class="grid two" style="margin-top:1.55vw;align-items:start">
+    <pre>name = "Alex"
+age = 34
+score = 98.5
+active = True
+nothing = None
+
+# Optional type hints
+age: int = 34
+name: str = "Alex"</pre>
+    <div class="panel">
+      <div class="label">Core mental model</div>
+      <div class="big">Names → objects / values</div>
+      <p>Python is dynamically typed. You do not declare a variable's type to create it.</p>
+      <div class="grid two" style="gap:.55vw;margin-top:.65vw">
+        <div class="panel"><code>type(age)</code><div class="small">inspect the runtime type</div></div>
+        <div class="panel"><code>isinstance(age, int)</code><div class="small">check whether a value matches a type</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="types">
+    <div class="type"><strong>str</strong><code>"hello"</code><div class="small">text</div></div>
+    <div class="type"><strong>int</strong><code>42</code><div class="small">whole numbers</div></div>
+    <div class="type"><strong>float</strong><code>3.14</code><div class="small">decimal numbers</div></div>
+    <div class="type"><strong>bool</strong><code>True / False</code><div class="small">logical values</div></div>
+    <div class="type"><strong>NoneType</strong><code>None</code><div class="small">absence of a value</div></div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">03</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Strings · cheatsheet</div>
+  <h2>Strings are immutable sequences with a <span class="yellow">rich standard toolkit.</span></h2>
+  <div class="string-grid">
+    <pre>s = "  Python is fun!  "
+
+s[0]                 # first character
+s[-1]                # last character
+s[2:8]               # slice
+
+s.lower()
+s.upper()
+s.strip()
+s.replace("fun", "useful")
+
+"python" in s.lower()
+len(s)</pre>
+    <div>
+      <div class="label">Common operations</div>
+      <div class="methods">
+        <div class="method"><code>s.strip()</code><span>remove surrounding whitespace</span></div>
+        <div class="method"><code>s.split(",")</code><span>split into a list</span></div>
+        <div class="method"><code>"-".join(parts)</code><span>join strings</span></div>
+        <div class="method"><code>s.startswith("Py")</code><span>prefix check</span></div>
+        <div class="method"><code>s.endswith(".py")</code><span>suffix check</span></div>
+        <div class="method"><code>s.find("th")</code><span>find a substring</span></div>
+        <div class="method"><code>s.count("p")</code><span>count occurrences</span></div>
+        <div class="method"><code>s.removeprefix("v")</code><span>remove known prefix</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid two" style="margin-top:1vw">
+    <div class="panel"><div class="label">Formatting</div><pre>name = "Alex"
+score = 95
+message = f"{name} scored {score}%"</pre></div>
+    <div class="callout"><strong>Gotcha:</strong> strings are immutable. Operations such as <code>replace()</code> return a new string; they do not modify the original.</div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">04</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Numbers · booleans · None</div>
+  <h2>Small values form the building blocks of <span class="yellow">conditions and calculations.</span></h2>
+  <div class="grid four" style="margin-top:1.55vw">
+    <div class="panel"><div class="label">Arithmetic</div><pre>+  -  *  /
+//   %  **</pre><p>Division with <code>/</code> produces a float; <code>//</code> performs floor division.</p></div>
+    <div class="panel"><div class="label">Comparisons</div><pre>==  !=
+<   <=
+>   >=</pre><p>Comparisons produce <code>True</code> or <code>False</code>.</p></div>
+    <div class="panel"><div class="label">Boolean logic</div><pre>and
+or
+not</pre><p>Use words rather than JavaScript's <code>&&</code>, <code>||</code>, <code>!</code>.</p></div>
+    <div class="panel"><div class="label">Absence</div><pre>value is None</pre><p>Use <code>None</code> to represent no value; use <code>is None</code> for the identity check.</p></div>
+  </div>
+  <div class="grid two" style="margin-top:1.35vw">
+    <pre>price = 100
+tax = 0.18
+
+total = price * (1 + tax)
+print(total)</pre>
+    <div class="callout"><strong>Python truthiness:</strong> values such as <code>0</code>, <code>""</code>, <code>[]</code>, and <code>None</code> are falsy. Many non-empty values are truthy.</div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">05</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Lists · cheatsheet</div>
+  <h2>Lists are Python's everyday <span class="yellow">ordered, mutable collection.</span></h2>
+  <div class="grid two" style="margin-top:1.45vw">
+    <pre>tasks = ["learn", "practice", "build"]
+
+tasks[0]                  # access
+tasks[-1]                 # last item
+tasks[1:3]                # slice
+
+tasks.append("ship")
+tasks.extend(["review", "share"])
+tasks.insert(1, "plan")
+
+tasks.remove("practice")
+last = tasks.pop()
+
+"learn" in tasks
+len(tasks)</pre>
+    <div>
+      <div class="label">Common operations</div>
+      <div class="ops">
+        <div class="op"><code>items.append(x)</code><span>add one item</span></div>
+        <div class="op"><code>items.extend(xs)</code><span>add many items</span></div>
+        <div class="op"><code>items.insert(i, x)</code><span>insert at position</span></div>
+        <div class="op"><code>items.remove(x)</code><span>remove first matching value</span></div>
+        <div class="op"><code>items.pop()</code><span>remove and return an item</span></div>
+        <div class="op"><code>items.sort()</code><span>sort in place</span></div>
+        <div class="op"><code>sorted(items)</code><span>return a new sorted list</span></div>
+        <div class="op"><code>items.copy()</code><span>shallow copy</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:.9vw"><strong>Gotcha:</strong> <code>b = a</code> does not copy a list. Both names can refer to the same mutable object.</div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">06</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Tuples · cheatsheet</div>
+  <h2>Tuples group values when <span class="yellow">the grouping should not change.</span></h2>
+  <div class="grid two" style="margin-top:1.55vw">
+    <pre>point = (10, 20)
+
+point[0]
+x, y = point
+
+# Named fields are often clearer:
+user = ("Alex", "Developer")
+name, role = user</pre>
+    <div class="panel">
+      <div class="label">Tuple toolkit</div>
+      <div class="ops">
+        <div class="op"><code>t[0]</code><span>index</span></div>
+        <div class="op"><code>t[1:3]</code><span>slice</span></div>
+        <div class="op"><code>x, y = t</code><span>unpack</span></div>
+        <div class="op"><code>t.count(x)</code><span>count values</span></div>
+        <div class="op"><code>t.index(x)</code><span>find position</span></div>
+        <div class="op"><code>x in t</code><span>membership</span></div>
+      </div>
+      <div class="callout" style="margin-top:.8vw"><strong>Immutable:</strong> you cannot assign to <code>point[0]</code> after the tuple is created.</div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="box"><strong>Tuple</strong><div class="small">(10, 20)</div></div>
+    <div class="arrow2">→</div>
+    <div class="box"><strong>Unpack</strong><div class="small">x, y = point</div></div>
+    <div class="arrow2">→</div>
+    <div class="box"><strong>Use</strong><div class="small">x + y</div></div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">07</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Sets · cheatsheet</div>
+  <h2>Sets are about <span class="yellow">uniqueness and membership.</span></h2>
+  <div class="grid two" style="margin-top:1.55vw">
+    <pre>skills = {"python", "javascript", "python"}
+
+print(skills)
+# {"python", "javascript"}
+
+"python" in skills
+
+skills.add("sql")
+skills.remove("sql")
+
+frontend = {"html", "css", "javascript"}
+fullstack = {"javascript", "python", "sql"}
+
+frontend & fullstack     # intersection
+frontend | fullstack     # union
+frontend - fullstack     # difference</pre>
+    <div>
+      <div class="label">Set operations</div>
+      <div class="grid two">
+        <div class="panel"><div class="big">∩</div><div class="small">Intersection — values in both</div></div>
+        <div class="panel"><div class="big">∪</div><div class="small">Union — values in either</div></div>
+        <div class="panel"><div class="big">−</div><div class="small">Difference — values only in first</div></div>
+        <div class="panel"><div class="big">⊆</div><div class="small">Subset — all values contained</div></div>
+      </div>
+      <div class="callout" style="margin-top:.85vw"><strong>Best use:</strong> fast membership checks and removing duplicates when order is not the primary concern.</div>
+    </div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">08</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Dictionaries · cheatsheet</div>
+  <h2>Dictionaries are Python's everyday <span class="yellow">key → value structure.</span></h2>
+  <div class="grid two" style="margin-top:1.45vw">
+    <pre>user = {
+    "name": "Alex",
+    "role": "developer",
+    "active": True,
+}
+
+user["name"]
+user.get("email")
+user["role"] = "architect"
+
+user["team"] = "Platform"
+del user["active"]
+
+"name" in user
+len(user)</pre>
+    <div>
+      <div class="label">Common operations</div>
+      <div class="ops">
+        <div class="op"><code>d[key]</code><span>access; raises KeyError if absent</span></div>
+        <div class="op"><code>d.get(key)</code><span>access safely; can provide default</span></div>
+        <div class="op"><code>d.keys()</code><span>keys view</span></div>
+        <div class="op"><code>d.values()</code><span>values view</span></div>
+        <div class="op"><code>d.items()</code><span>key/value pairs</span></div>
+        <div class="op"><code>d.update(other)</code><span>merge/update values</span></div>
+        <div class="op"><code>d.pop(key)</code><span>remove and return</span></div>
+        <div class="op"><code>key in d</code><span>membership by key</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:.9vw"><strong>Gotcha:</strong> dictionary lookup with <code>d[key]</code> raises <code>KeyError</code> when the key is absent. Use <code>get()</code> when absence is expected.</div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">09</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Indexing & slicing</div>
+  <h2>Sequences share a powerful rule: <span class="yellow">index from either end, slice with ranges.</span></h2>
+  <div class="slice">
+    <div class="visual-index">
+      <div class="label">Example sequence</div>
+      <div class="indexline">
+        <span class="idx">index</span><span class="idx">0</span><span class="idx">1</span><span class="idx">2</span><span class="idx">3</span><span class="idx">4</span>
+      </div>
+      <div class="indexline">
+        <span class="idx">value</span><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span>
+      </div>
+      <div class="indexline">
+        <span class="idx">from end</span><span>-5</span><span>-4</span><span>-3</span><span>-2</span><span>-1</span>
+      </div>
+      <div class="callout" style="margin-top:.8vw"><strong>Slice rule:</strong> start is included; stop is excluded.</div>
+    </div>
+    <pre>items = ["A", "B", "C", "D", "E"]
+
+items[0]       # "A"
+items[-1]      # "E"
+
+items[1:4]     # ["B", "C", "D"]
+items[:3]      # ["A", "B", "C"]
+items[2:]      # ["C", "D", "E"]
+items[::2]     # ["A", "C", "E"]
+items[::-1]    # reversed copy</pre>
+  </div>
+  <div class="grid three" style="margin-top:1vw">
+    <div class="panel"><div class="label">Works with</div><div class="big">str · list · tuple</div></div>
+    <div class="panel"><div class="label">Pattern</div><div class="big"><code>[start:stop:step]</code></div></div>
+    <div class="panel"><div class="label">Remember</div><div class="big">stop is exclusive</div></div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">10</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Conditions</div>
+  <h2>Python conditions are simple; <span class="yellow">truthiness keeps them expressive.</span></h2>
+  <div class="grid two" style="margin-top:1.5vw">
+    <pre>score = 82
+
+if score >= 90:
+    grade = "A"
+elif score >= 75:
+    grade = "B"
+else:
+    grade = "C"
+
+if grade == "B":
+    print("Good work")</pre>
+    <div>
+      <div class="label">Condition building blocks</div>
+      <div class="grid two">
+        <div class="panel"><code>== != &lt; &lt;= &gt; &gt;=</code><div class="small">comparisons</div></div>
+        <div class="panel"><code>and · or · not</code><div class="small">combine conditions</div></div>
+        <div class="panel"><code>is None</code><div class="small">identity check</div></div>
+        <div class="panel"><code>in</code><div class="small">membership</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid three" style="margin-top:1vw">
+    <div class="panel"><div class="label">Falsy examples</div><div class="big"><code>False · 0 · ""</code></div><div class="small">also empty collections and <code>None</code></div></div>
+    <div class="panel"><div class="label">Truthy examples</div><div class="big"><code>True · 42 · "x"</code></div><div class="small">non-empty collections are truthy</div></div>
+    <div class="callout"><strong>Gotcha:</strong> use <code>is</code> for identity, especially <code>value is None</code>. Use <code>==</code> for value equality.</div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">11</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Loops</div>
+  <h2>Python loops favor <span class="yellow">iterating over the thing you need.</span></h2>
+  <div class="grid two" style="margin-top:1.5vw">
+    <pre># for: iterate over values
+for task in tasks:
+    print(task)
+
+# range: generate numbers
+for i in range(3):
+    print(i)
+
+# while: repeat while true
+attempts = 0
+while attempts < 3:
+    attempts += 1</pre>
+    <pre># break: leave the loop
+for task in tasks:
+    if task == "build":
+        break
+
+# continue: skip this iteration
+for task in tasks:
+    if task == "practice":
+        continue
+    print(task)</pre>
+  </div>
+  <div class="grid three" style="margin-top:1vw">
+    <div class="panel"><div class="label">Prefer</div><div class="big"><code>for item in items</code></div><div class="small">rather than manually managing indexes when you don't need them.</div></div>
+    <div class="panel"><div class="label">Need index?</div><div class="big"><code>enumerate(items)</code></div><div class="small">introduced in the Pythonic basics cheatsheet.</div></div>
+    <div class="callout"><strong>Gotcha:</strong> changing a collection while iterating over it can produce surprising behavior. Prefer building a new collection when transforming data.</div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">12</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Functions · cheatsheet</div>
+  <h2>Functions package behavior into <span class="yellow">small, reusable units.</span></h2>
+  <div class="function-anatomy">
+    <div class="fbox"><strong>DEFINITION</strong><code>def calculate_total</code></div>
+    <div class="connector">→</div>
+    <div class="fbox"><strong>PARAMETER</strong><code>prices: list[float]</code></div>
+    <div class="connector">→</div>
+    <div class="fbox"><strong>RETURN TYPE</strong><code>→ float</code></div>
+  </div>
+  <pre style="margin-top:.85vw">def calculate_total(prices: list[float]) -> float:
+    return sum(prices)
+
+total = calculate_total([10.5, 20, 5.5])</pre>
+  <div class="param-grid">
+    <div class="param"><code>def greet(name):</code><strong>Required parameter</strong><span>Caller must provide a value.</span></div>
+    <div class="param"><code>def greet(name="there"):</code><strong>Default argument</strong><span>Used when the caller omits the argument.</span></div>
+    <div class="param"><code>greet(name="Alex")</code><strong>Keyword argument</strong><span>Call by parameter name for clarity.</span></div>
+  </div>
+  <div class="grid two" style="margin-top:.85vw">
+    <div class="panel"><div class="label">Return</div><div class="big"><code>return value</code></div><div class="small">A function can return any Python value, including nothing explicitly — then the result is <code>None</code>.</div></div>
+    <div class="callout"><strong>Engineering habit:</strong> keep functions focused. A small function is easier to test, reuse, and reason about.</div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">13</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Function parameters · cheatsheet</div>
+  <h2>Python gives you several ways to make function calls <span class="yellow">clear and flexible.</span></h2>
+  <div class="grid two" style="margin-top:1.45vw">
+    <pre>def connect(host, port=443, secure=True):
+    ...
+
+connect("api.example.com")
+connect("api.example.com", 8080)
+connect(
+    "api.example.com",
+    secure=False,
+)
+
+# Keyword arguments make intent obvious
+connect(
+    host="api.example.com",
+    port=8080,
+)</pre>
+    <div>
+      <div class="label">Parameter patterns</div>
+      <div class="grid two">
+        <div class="panel"><code>name</code><div class="small">required parameter</div></div>
+        <div class="panel"><code>name="value"</code><div class="small">default value</div></div>
+        <div class="panel"><code>*args</code><div class="small">variable positional arguments</div></div>
+        <div class="panel"><code>**kwargs</code><div class="small">variable keyword arguments</div></div>
+      </div>
+      <div class="callout" style="margin-top:.8vw"><strong>Important gotcha:</strong> avoid mutable defaults such as <code>def add(x, items=[])</code>. That list is created once, not once per call.</div>
+    </div>
+  </div>
+  <div class="grid three" style="margin-top:1vw">
+    <div class="panel"><div class="label">Positional</div><div class="big"><code>fn(a, b)</code></div></div>
+    <div class="panel"><div class="label">Keyword</div><div class="big"><code>fn(a=1, b=2)</code></div></div>
+    <div class="panel"><div class="label">Mixed</div><div class="big"><code>fn(1, b=2)</code></div></div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">14</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Type hints & strings</div>
+  <h2>Type hints document intent; f-strings make output <span class="yellow">pleasant to write.</span></h2>
+  <div class="grid two" style="margin-top:1.5vw">
+    <div class="panel">
+      <div class="label">Type hints</div>
+      <pre>def calculate_total(
+    prices: list[float],
+    tax: float = 0.0,
+) -> float:
+    return sum(prices) * (1 + tax)</pre>
+      <ul>
+        <li>Improve readability.</li>
+        <li>Help IDEs and static-analysis tools.</li>
+        <li>Do not automatically enforce runtime types.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="label">f-strings</div>
+      <pre>name = "Alex"
+score = 95
+
+f"{name} scored {score}%"
+f"Total: {100 * 1.18:.2f}"
+f"{name.upper()}"</pre>
+      <ul>
+        <li>Put expressions directly inside <code>{ }</code>.</li>
+        <li>Use format specifiers when needed.</li>
+        <li>Prefer over manual string concatenation.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1vw"><strong>JS/TS bridge:</strong> type hints feel familiar to TypeScript developers, but Python annotations and TypeScript types play different roles at runtime.</div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">15</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Pythonic basics · cheatsheet</div>
+  <h2>Python becomes expressive when you learn its <span class="yellow">small everyday idioms.</span></h2>
+  <div class="idiom-grid">
+    <div class="panel idiom"><code>enumerate()</code><strong>index + value</strong><span><code>for i, item in enumerate(items, 1)</code></span></div>
+    <div class="panel idiom"><code>zip()</code><strong>walk together</strong><span><code>for a, b in zip(xs, ys)</code></span></div>
+    <div class="panel idiom"><code>range()</code><strong>number sequences</strong><span><code>range(5)</code> → 0…4</span></div>
+    <div class="panel idiom"><code>a, b = pair</code><strong>unpacking</strong><span>Assign multiple values at once.</span></div>
+  </div>
+  <div class="grid two" style="margin-top:.85vw">
+    <pre># list comprehension
+upper = [s.upper() for s in names]
+
+# dictionary comprehension
+lengths = {s: len(s) for s in names}
+
+# unpacking
+first, *middle, last = items</pre>
+    <div>
+      <div class="label">A useful mental model</div>
+      <div class="panel"><div class="big">Express the transformation close to the data.</div><p>Comprehensions are especially useful for straightforward transformations and filtering.</p></div>
+      <div class="callout" style="margin-top:.7vw"><strong>Readability rule:</strong> if a comprehension needs a paragraph to explain it, use a normal loop.</div>
+    </div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">16</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Python gotchas</div>
+  <h2>These few sharp edges save a lot of <span class="yellow">debugging time.</span></h2>
+  <div class="gotcha-grid">
+    <div class="gotcha">
+      <h3>1 · Assignment is not copying</h3>
+      <pre>a = [1, 2]
+b = a
+b.append(3)
+# a == [1, 2, 3]</pre>
+      <p>Lists are mutable. Two names can reference the same list.</p>
+    </div>
+    <div class="gotcha">
+      <h3>2 · <code>is</code> is not equality</h3>
+      <pre>x == y       # same value?
+x is y        # same object?
+
+value is None</pre>
+      <p>Use <code>==</code> for value equality; use <code>is</code> for identity.</p>
+    </div>
+    <div class="gotcha">
+      <h3>3 · Mutable default arguments</h3>
+      <pre>def add(x, items=[]):
+    items.append(x)
+    return items</pre>
+      <p>The default list is shared across calls. Prefer <code>items=None</code> and create a list inside.</p>
+    </div>
+  </div>
+  <div class="grid three" style="margin-top:.9vw">
+    <div class="panel"><div class="label">Notebook gotcha</div><div class="big">Cells can run out of order.</div><div class="small">A notebook can contain state that is not obvious from the page order.</div></div>
+    <div class="panel"><div class="label">Language gotcha</div><div class="big">Indentation is syntax.</div><div class="small">A block's indentation determines its structure.</div></div>
+    <div class="panel"><div class="label">Truthiness</div><div class="big"><code>[] · "" · 0 · None</code></div><div class="small">These values are falsy in conditions.</div></div>
+  </div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">17</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Guided challenge · recap</div>
+  <h2>Put today's building blocks together in <span class="yellow">one small piece of logic.</span></h2>
+  <div class="challenge">
+    <div>
+      <div class="label">Starting data</div>
+      <pre>tasks = [
+    {"title": "Learn Python", "completed": True},
+    {"title": "Build something", "completed": False},
+    {"title": "Teach someone", "completed": False},
+]</pre>
+      <div class="panel" style="margin-top:.75vw"><div class="big">Challenge</div><p>Create a list containing the titles of the incomplete tasks.</p></div>
+      <div class="panel" style="margin-top:.65vw"><div class="label">Bonus</div><p>Print the results as <code>1. Build something</code>, <code>2. Teach someone</code>.</p></div>
+    </div>
+    <div>
+      <div class="label">One clean solution</div>
+      <pre>incomplete = [
+    task["title"]
+    for task in tasks
+    if not task["completed"]
+]
+
+for i, title in enumerate(incomplete, 1):
+    print(f"{i}. {title}")</pre>
+      <div class="label" style="margin-top:.75vw">Today's mental model</div>
+      <div class="flowlist">
+        <div class="flowitem">Values</div>
+        <div class="flowitem">Collections</div>
+        <div class="flowitem">Control flow</div>
+        <div class="flowitem">Functions</div>
+        <div class="flowitem">Pythonic transformations</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:.75vw"><strong>Next:</strong> tomorrow we move from Python expressions to maintainable application code.</div>
+  <div class="footer"><span><strong>Instructor:</strong> Suman Barick</span><span><strong>L&amp;D POC:</strong> Rahul Bajaj / Aman Singh Kamboj</span></div><div class="num">18</div>
+</section>
+
+
+<style>
+  .nav{
+    position:fixed;right:1.45vw;bottom:1.15vw;z-index:100;
+    display:flex;gap:.45vw;opacity:.72;transition:opacity .2s
+  }
+  .nav:hover{opacity:1}
+  .nav button{
+    width:2.65vw;height:2.65vw;border:1px solid #666;border-radius:7px;
+    background:#242424;color:#f5f5f5;font-size:1.35vw;cursor:pointer;
+    display:flex;align-items:center;justify-content:center
+  }
+  .nav button:hover{border-color:#aaa;background:#303030}
+  .nav .counter{
+    min-width:4.1vw;height:2.65vw;padding:0 .6vw;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid #555;border-radius:7px;background:#202020;
+    color:#aaa;font-size:.68vw
+  }
+  .hint{
+    position:fixed;right:1.45vw;top:1vw;z-index:100;color:#777;
+    font-size:.62vw;opacity:.55
+  }
+  @media print{.nav,.hint{display:none}}
+</style>
+<div class="nav" aria-label="Slide navigation">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <div class="counter" id="counter">1 / 18</div>
+  <button id="next" aria-label="Next slide">→</button>
+</div>
+<div class="hint">← → navigate</div>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let current = 0;
+
+  function go(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides[current].scrollIntoView({behavior:'smooth', block:'start'});
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  document.getElementById('prev').addEventListener('click', () => go(current - 1));
+  document.getElementById('next').addEventListener('click', () => go(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); go(current - 1); }
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); go(current + 1); }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        current = slides.indexOf(entry.target);
+        document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+      }
+    });
+  }, {threshold: 0.6});
+
+  slides.forEach(s => observer.observe(s));
+})();
+</script>
+
+</body>
+</html>
