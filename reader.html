@@ -421,6 +421,9 @@
       <div class="doc-title-badge" id="nav-doc-title">Python Training Chapter</div>
     </div>
     <div class="nav-right">
+      <a href="#" id="downloadMdBtn" class="btn-back" download="chapter.md" title="Download this markdown file" style="color:var(--accent-yellow); border-color:rgba(255,230,0,0.3);">
+        ⬇ Download .md
+      </a>
       <label for="chapterSelect" style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Chapter:</label>
       <select id="chapterSelect" class="chapter-select" onchange="switchChapter(this.value)">
         <option value="day-01/01_python_fundamentals.md">Day 1: Python Foundations</option>
@@ -523,9 +526,14 @@
       const contentArea = document.getElementById('contentArea');
       const navTitle = document.getElementById('nav-doc-title');
       const chapterSelect = document.getElementById('chapterSelect');
+      const downloadMdBtn = document.getElementById('downloadMdBtn');
 
       contentArea.innerHTML = '<div class="loading-state">Loading chapter content...</div>';
       chapterSelect.value = filePath;
+      
+      // Configure download button
+      downloadMdBtn.href = filePath;
+      downloadMdBtn.download = filePath.split('/').pop();
 
       try {
         const response = await fetch(filePath);

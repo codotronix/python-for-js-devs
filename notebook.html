@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jupyter Notebook Viewer — Learn Python in 5 Days</title>
+  
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0d0e11;
+      --bg-surface: #14161b;
+      --bg-card: #181a20;
+      --bg-code: #0b0c0e;
+      --border-color: #2a2e38;
+      --border-subtle: #1e2128;
+      --text-primary: #f3f4f6;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent-yellow: #ffe600;
+      --accent-yellow-dim: rgba(255, 230, 0, 0.1);
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-rose: #fb7185;
+      --accent-colab: #f9ab00;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Fira Code", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent-yellow);
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Top Navigation Bar */
+    header.reader-nav {
+      position: sticky;
+      top: 0;
+      background: rgba(13, 14, 17, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 900;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-back:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
+    .doc-title-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .doc-title-badge::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-yellow);
+      border-radius: 2px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-colab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(180deg, #2b2615 0%, #1e1b12 100%);
+      border: 1px solid var(--accent-colab);
+      color: #ffd875;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-colab:hover {
+      background: var(--accent-colab);
+      color: #000000;
+      box-shadow: 0 0 12px rgba(249, 171, 0, 0.4);
+    }
+
+    .btn-colab svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    .chapter-select {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .chapter-select:focus {
+      border-color: var(--accent-yellow);
+    }
+
+    /* Main Layout */
+    .reader-layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 32px 80px 32px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 48px;
+      align-items: flex-start;
+    }
+
+    aside.toc-sidebar {
+      position: sticky;
+      top: 90px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .toc-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      margin-bottom: 12px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toc-list li {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .toc-list li.toc-h3 {
+      padding-left: 12px;
+    }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .toc-list a:hover {
+      color: var(--accent-yellow);
+    }
+
+    /* Notebook Container */
+    main.notebook-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 36px 44px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Cell Styles */
+    .nb-cell {
+      position: relative;
+      border-radius: 6px;
+    }
+
+    /* Markdown Cell */
+    .nb-markdown-cell {
+      padding: 8px 12px;
+      color: var(--text-secondary);
+    }
+
+    .nb-markdown-cell h1 {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+
+    .nb-markdown-cell h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 6px;
+    }
+
+    .nb-markdown-cell h3 {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+
+    .nb-markdown-cell p {
+      font-size: 14px;
+      margin-bottom: 12px;
+      line-height: 1.65;
+    }
+
+    .nb-markdown-cell ul, .nb-markdown-cell ol {
+      margin-bottom: 12px;
+      padding-left: 24px;
+    }
+
+    .nb-markdown-cell li {
+      font-size: 13.5px;
+      margin-bottom: 4px;
+    }
+
+    .nb-markdown-cell code:not(pre code) {
+      background: var(--bg-code);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .nb-markdown-cell hr {
+      border: 0;
+      height: 1px;
+      background: var(--border-color);
+      margin: 24px 0;
+    }
+
+    /* Code Cell Layout */
+    .nb-code-cell {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .nb-code-cell:hover {
+      border-color: var(--border-color);
+    }
+
+    .nb-input-row {
+      display: grid;
+      grid-template-columns: 65px 1fr;
+      align-items: stretch;
+      position: relative;
+    }
+
+    .nb-prompt {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 14px 8px;
+      text-align: right;
+      user-select: none;
+      background: #111317;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .nb-prompt.in {
+      color: var(--accent-cyan);
+    }
+
+    .nb-prompt.out {
+      color: var(--accent-rose);
+    }
+
+    .nb-code-area {
+      position: relative;
+      background: var(--bg-code);
+    }
+
+    .nb-code-area pre {
+      margin: 0;
+      padding: 14px 16px;
+      overflow-x: auto;
+    }
+
+    .nb-code-area pre code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.5;
+      background: transparent !important;
+    }
+
+    .btn-copy {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-family: var(--font-sans);
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.15s;
+    }
+
+    .nb-code-cell:hover .btn-copy {
+      opacity: 1;
+    }
+
+    .btn-copy:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
+    /* Output Row */
+    .nb-output-row {
+      display: grid;
+      grid-template-columns: 65px 1fr;
+      border-top: 1px solid var(--border-subtle);
+      background: #101216;
+    }
+
+    .nb-output-area {
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Colab Hero Banner */
+    .colab-hero-banner {
+      background: linear-gradient(90deg, rgba(249, 171, 0, 0.08) 0%, rgba(24, 26, 32, 0.6) 100%);
+      border: 1px solid rgba(249, 171, 0, 0.3);
+      border-radius: 6px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .colab-hero-text {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .colab-hero-text strong {
+      color: #ffd875;
+    }
+
+    /* Footer */
+    footer.site-footer {
+      max-width: 1280px;
+      margin: 40px auto 0 auto;
+      border-top: 1px solid var(--border-color);
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-left {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-item strong {
+      color: var(--text-primary);
+    }
+
+    .footer-right {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--accent-yellow);
+    }
+
+    @media (max-width: 900px) {
+      .reader-layout {
+        grid-template-columns: 1fr;
+      }
+      aside.toc-sidebar {
+        display: none;
+      }
+      main.notebook-container {
+        padding: 20px 14px;
+      }
+      .colab-hero-banner {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="reader-nav">
+    <div class="nav-left">
+      <a href="index.html" class="btn-back">← Course Hub</a>
+      <div class="doc-title-badge" id="nav-doc-title">Jupyter Notebook</div>
+    </div>
+    <div class="nav-right">
+      <a href="#" id="downloadNbBtn" class="btn-back" download="notebook.ipynb" title="Download this Jupyter notebook" style="color:var(--accent-yellow); border-color:rgba(255,230,0,0.3);">
+        ⬇ Download .ipynb
+      </a>
+      <a href="#" id="colabTopBtn" class="btn-colab" target="_blank" title="Run interactively in Google Colab">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.288c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.196 1.006.128.832.933z"/>
+        </svg>
+        Open in Colab
+      </a>
+      <select id="chapterSelect" class="chapter-select" onchange="switchNotebook(this.value)">
+        <option value="day-01/01_python_fundamentals.ipynb">Day 1: Fundamentals Notebook</option>
+        <option value="day-02/02_practical_python.ipynb">Day 2: Practical Python Notebook</option>
+        <option value="day-03/03_web_and_async.ipynb">Day 3: Web &amp; Async Notebook</option>
+        <option value="day-04/04_fastapi_pydantic.ipynb">Day 4: FastAPI &amp; Pydantic Notebook</option>
+        <option value="day-05/05_sqlite_and_capstone.ipynb">Day 5: SQLite &amp; Capstone Notebook</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Layout Container -->
+  <div class="reader-layout">
+    
+    <!-- Table of Contents Sidebar -->
+    <aside class="toc-sidebar">
+      <div class="toc-title">Notebook Sections</div>
+      <ul class="toc-list" id="tocList">
+        <li style="color:var(--text-muted);">Parsing notebook...</li>
+      </ul>
+    </aside>
+
+    <!-- Main Notebook Rendered Cells -->
+    <main class="notebook-container" id="notebookContainer">
+      <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+        Loading Jupyter Notebook...
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-left">
+      <span class="footer-item">Instructor: <strong>Suman Barick</strong></span>
+      <span class="footer-item">L&amp;D POC: <strong>Rahul Bajaj / Aman Singh Kamboj</strong></span>
+    </div>
+    <div class="footer-right">Learn Python in 5 Days • Interactive Notebook</div>
+  </footer>
+
+  <script>
+    const GITHUB_REPO = "codotronix/barick-python-tutorial";
+    const GITHUB_BRANCH = "dev";
+
+    marked.setOptions({
+      breaks: false,
+      gfm: true
+    });
+
+    function copyToClipboard(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = 'var(--accent-green)';
+        btn.style.color = '#000000';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1500);
+      });
+    }
+
+    function generateTOC() {
+      const container = document.getElementById('notebookContainer');
+      const headings = container.querySelectorAll('h1, h2, h3');
+      const tocList = document.getElementById('tocList');
+      tocList.innerHTML = '';
+
+      if (headings.length === 0) {
+        tocList.innerHTML = '<li style="color:var(--text-muted);">No sections found.</li>';
+        return;
+      }
+
+      headings.forEach((heading, idx) => {
+        if (idx === 0 && heading.tagName === 'H1') return; // Skip main title in TOC
+        const id = `nb-section-${idx}`;
+        heading.id = id;
+
+        const li = document.createElement('li');
+        if (heading.tagName === 'H3') {
+          li.classList.add('toc-h3');
+        }
+
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.textContent = heading.textContent.replace(/^#+\s*/, '');
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          heading.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    }
+
+    async function loadNotebook(filePath) {
+      const container = document.getElementById('notebookContainer');
+      const navTitle = document.getElementById('nav-doc-title');
+      const chapterSelect = document.getElementById('chapterSelect');
+      const colabTopBtn = document.getElementById('colabTopBtn');
+      const downloadNbBtn = document.getElementById('downloadNbBtn');
+
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading Jupyter Notebook...</div>';
+      chapterSelect.value = filePath;
+
+      // Update Download & Colab URLs
+      downloadNbBtn.href = filePath;
+      downloadNbBtn.download = filePath.split('/').pop();
+      const colabUrl = `https://colab.research.google.com/github/${GITHUB_REPO}/blob/${GITHUB_BRANCH}/${filePath}`;
+      colabTopBtn.href = colabUrl;
+
+      try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+          throw new Error(`Failed to load ${filePath} (HTTP ${response.status})`);
+        }
+        const data = await response.json();
+        
+        container.innerHTML = '';
+
+        // Add Interactive Colab Hero Banner
+        const heroBanner = document.createElement('div');
+        heroBanner.className = 'colab-hero-banner';
+        heroBanner.innerHTML = `
+          <div class="colab-hero-text">
+            <strong>Interactive Cloud Environment:</strong> Want to run and edit this code live in your browser?
+          </div>
+          <a href="${colabUrl}" class="btn-colab" target="_blank">
+            <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor;"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.288c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.196 1.006.128.832.933z"/></svg>
+            Launch in Google Colab
+          </a>
+        `;
+        container.appendChild(heroBanner);
+
+        let executionIndex = 1;
+
+        // Render each cell
+        data.cells.forEach((cell) => {
+          const rawSource = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
+
+          if (cell.cell_type === 'markdown') {
+            const mdCell = document.createElement('div');
+            mdCell.className = 'nb-cell nb-markdown-cell';
+            mdCell.innerHTML = marked.parse(rawSource);
+            container.appendChild(mdCell);
+
+            // Extract main title from first h1
+            if (!navTitle.dataset.set) {
+              const h1 = mdCell.querySelector('h1');
+              if (h1) {
+                navTitle.textContent = h1.textContent;
+                document.title = `${h1.textContent} — Jupyter Viewer`;
+                navTitle.dataset.set = "true";
+              }
+            }
+
+          } else if (cell.cell_type === 'code') {
+            const codeCell = document.createElement('div');
+            codeCell.className = 'nb-cell nb-code-cell';
+
+            // Input Row
+            const inputRow = document.createElement('div');
+            inputRow.className = 'nb-input-row';
+
+            const promptIn = document.createElement('div');
+            promptIn.className = 'nb-prompt in';
+            promptIn.textContent = `In [${cell.execution_count || executionIndex}]:`;
+
+            const codeArea = document.createElement('div');
+            codeArea.className = 'nb-code-area';
+
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.className = 'language-python';
+            code.textContent = rawSource;
+            pre.appendChild(code);
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'btn-copy';
+            copyBtn.textContent = 'Copy';
+            copyBtn.onclick = () => copyToClipboard(rawSource, copyBtn);
+
+            codeArea.appendChild(pre);
+            codeArea.appendChild(copyBtn);
+
+            inputRow.appendChild(promptIn);
+            inputRow.appendChild(codeArea);
+            codeCell.appendChild(inputRow);
+
+            // Output Row (if cell has outputs)
+            if (cell.outputs && cell.outputs.length > 0) {
+              const outputRow = document.createElement('div');
+              outputRow.className = 'nb-output-row';
+
+              const promptOut = document.createElement('div');
+              promptOut.className = 'nb-prompt out';
+              promptOut.textContent = `Out [${cell.execution_count || executionIndex}]:`;
+
+              const outputArea = document.createElement('div');
+              outputArea.className = 'nb-output-area';
+
+              let outputText = '';
+              cell.outputs.forEach(out => {
+                if (out.text) {
+                  outputText += Array.isArray(out.text) ? out.text.join('') : out.text;
+                } else if (out.data && out.data['text/plain']) {
+                  const plain = out.data['text/plain'];
+                  outputText += Array.isArray(plain) ? plain.join('') : plain;
+                }
+              });
+
+              outputArea.textContent = outputText || '(Executed without output)';
+              outputRow.appendChild(promptOut);
+              outputRow.appendChild(outputArea);
+              codeCell.appendChild(outputRow);
+            }
+
+            container.appendChild(codeCell);
+            executionIndex++;
+          }
+        });
+
+        // Highlight code cells
+        document.querySelectorAll('.nb-code-area pre code').forEach(el => {
+          hljs.highlightElement(el);
+        });
+
+        // Generate TOC
+        generateTOC();
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+      } catch (err) {
+        container.innerHTML = `
+          <div style="padding: 40px; text-align: center;">
+            <h2 style="color:var(--accent-rose); margin-bottom:12px;">Failed to Load Notebook</h2>
+            <p style="color:var(--text-secondary); margin-bottom: 20px;">Could not parse <code>${filePath}</code>.</p>
+            <p style="font-size:12.5px; color:var(--text-muted); margin-bottom: 20px;">
+              If running directly via <code>file://</code>, local browser security may restrict local fetch requests.
+            </p>
+            <a href="${colabUrl}" class="btn-colab" target="_blank" style="display:inline-flex;">
+              Open Directly in Google Colab →
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    function switchNotebook(filePath) {
+      window.history.pushState({}, '', `?file=${encodeURIComponent(filePath)}`);
+      document.getElementById('nav-doc-title').dataset.set = "";
+      loadNotebook(filePath);
+    }
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetFile = urlParams.get('file') || 'day-01/01_python_fundamentals.ipynb';
+      loadNotebook(targetFile);
+    });
+
+    window.addEventListener('popstate', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetFile = urlParams.get('file') || 'day-01/01_python_fundamentals.ipynb';
+      loadNotebook(targetFile);
+    });
+  </script>
+</body>
+</html>
