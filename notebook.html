@@ -100,6 +100,17 @@
       border-color: var(--accent-yellow);
     }
 
+    .btn-download {
+      color: var(--accent-yellow);
+      border-color: rgba(255, 230, 0, 0.3);
+    }
+
+    .btn-download:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
     .doc-title-badge {
       font-size: 13px;
       font-weight: 700;
@@ -487,7 +498,7 @@
       <div class="doc-title-badge" id="nav-doc-title">Jupyter Notebook</div>
     </div>
     <div class="nav-right">
-      <a href="#" id="downloadNbBtn" class="btn-back" download="notebook.ipynb" title="Download this Jupyter notebook" style="color:var(--accent-yellow); border-color:rgba(255,230,0,0.3);">
+      <a href="#" id="downloadNbBtn" class="btn-back btn-download" download="notebook.ipynb" title="Download this Jupyter notebook">
         ⬇ Download .ipynb
       </a>
       <a href="#" id="colabTopBtn" class="btn-colab" target="_blank" title="Run interactively in Google Colab">
