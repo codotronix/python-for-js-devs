@@ -100,6 +100,17 @@
       border-color: var(--accent-yellow);
     }
 
+    .btn-download {
+      color: var(--accent-yellow);
+      border-color: rgba(255, 230, 0, 0.3);
+    }
+
+    .btn-download:hover {
+      background: var(--accent-yellow);
+      color: #000000;
+      border-color: var(--accent-yellow);
+    }
+
     .doc-title-badge {
       font-size: 13px;
       font-weight: 700;
@@ -421,7 +432,7 @@
       <div class="doc-title-badge" id="nav-doc-title">Python Training Chapter</div>
     </div>
     <div class="nav-right">
-      <a href="#" id="downloadMdBtn" class="btn-back" download="chapter.md" title="Download this markdown file" style="color:var(--accent-yellow); border-color:rgba(255,230,0,0.3);">
+      <a href="#" id="downloadMdBtn" class="btn-back btn-download" download="chapter.md" title="Download this markdown file">
         ⬇ Download .md
       </a>
       <label for="chapterSelect" style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Chapter:</label>
